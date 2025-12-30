@@ -7,7 +7,6 @@
 //
 
 import UIKit
-//import SkyWay
 import XLPagerTabStrip
 //import FirebaseStorage
 
@@ -32,11 +31,6 @@ class ViewController3: UIViewController,UIScrollViewDelegate,UICollectionViewDat
     let cell_hi: CGFloat = 1.3//160:208
     
     var idCount:Int=0
-    
-    //fileprivate var peer: SKWPeer?
-    //fileprivate var mediaConnection: SKWMediaConnection?
-    //var hymPeer: HYMPeer!
-    //var hymMedeiaConnection: HYMMediaConnection!
     
     @IBOutlet weak var CollectionView: UICollectionView!
     

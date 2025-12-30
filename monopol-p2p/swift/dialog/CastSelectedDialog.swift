@@ -9,7 +9,6 @@
 import UIKit
 import Firebase
 import FirebaseDatabase
-import SkyWay
 
 class CastSelectedDialog: UIView,UIGestureRecognizerDelegate {
     let iconSize: CGFloat = 16.0
