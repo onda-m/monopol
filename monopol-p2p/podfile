@@ -1,0 +1,35 @@
+# platform :ios,'13.0'
+use_frameworks!
+
+def install_pods
+  pod 'SwiftyGif'
+  pod 'SkyWay'
+  pod 'ReachabilitySwift'
+  pod 'PINRemoteImage'
+  pod 'XLPagerTabStrip', '~> 8.1'
+  pod 'Firebase'                      # メタPod（Analytics等を含む）
+  pod 'FirebaseAnalytics'             # Coreの代替
+  pod 'FirebaseAuth'
+  pod 'FirebaseDatabase'
+  pod 'FirebaseStorage'
+  pod 'FirebaseMessaging'
+  pod 'ReverseExtension'
+  pod 'CommonKeyboard'
+  pod 'Onboard'
+  pod 'LineSDKSwift', '~> 5.0'
+end
+
+post_install do |installer|
+  # Pods 側の全ターゲットに反映
+  installer.pods_project.targets.each do |t|
+    t.build_configurations.each do |c|
+      c.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      c.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64' # 使っているなら継続
+    end
+  end
+end
+
+target 'swift_skyway' do
+  install_pods
+end
+

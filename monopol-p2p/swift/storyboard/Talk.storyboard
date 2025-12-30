@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="pLq-1i-ah9">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Talk Top View Controller-->
+        <scene sceneID="hOL-yW-e07">
+            <objects>
+                <viewController storyboardIdentifier="toTalkTopViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="pLq-1i-ah9" customClass="TalkTopViewController" customModule="swift_skyway" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="zaO-5l-BKd">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="Rhf-TU-pL5">
+                                <rect key="frame" x="0.0" y="58" width="375" height="561"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="cell" rowHeight="67" id="fZg-7P-6TS" customClass="TalkTopViewCell" customModule="swift_skyway" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="49.5" width="375" height="67"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="fZg-7P-6TS" id="KKZ-cD-5Bt">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="67"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="pLq-1i-ah9" id="72U-jg-Au2"/>
+                                    <outlet property="delegate" destination="pLq-1i-ah9" id="5Va-z2-W2n"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="bfc-bx-JLQ"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="Rhf-TU-pL5" firstAttribute="trailing" secondItem="bfc-bx-JLQ" secondAttribute="trailing" id="93H-TK-Q9n"/>
+                            <constraint firstItem="Rhf-TU-pL5" firstAttribute="top" secondItem="bfc-bx-JLQ" secondAttribute="top" constant="58" id="Mv0-hP-j0d"/>
+                            <constraint firstItem="bfc-bx-JLQ" firstAttribute="bottom" secondItem="Rhf-TU-pL5" secondAttribute="bottom" constant="48" id="bzo-nD-f6Q"/>
+                            <constraint firstItem="Rhf-TU-pL5" firstAttribute="leading" secondItem="bfc-bx-JLQ" secondAttribute="leading" id="u4n-AJ-mfB"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="talkTableView" destination="Rhf-TU-pL5" id="gyF-7X-zGY"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="eZQ-Sa-TT7" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="131.8840579710145" y="101.08695652173914"/>
+        </scene>
+        <!--Talk Info View Controller-->
+        <scene sceneID="qG4-Rh-P3E">
+            <objects>
+                <viewController storyboardIdentifier="toTalkInfoViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="vMz-47-Agb" customClass="TalkInfoViewController" customModule="swift_skyway" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="jt4-CL-jZ6">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view hidden="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3RM-64-ivO">
+                                <rect key="frame" x="0.0" y="618" width="375" height="49"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                <color key="backgroundColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="JWb-H9-hR0" customClass="ThroughTableView" customModule="swift_skyway" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="60" width="375" height="499"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="cell" rowHeight="67" id="p4A-oI-e51" customClass="TalkTopViewCell" customModule="swift_skyway" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="49.5" width="375" height="67"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="p4A-oI-e51" id="SWK-Lc-zwW">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="67"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                            </tableView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="H08-6i-h5w" userLabel="SendView">
+                                <rect key="frame" x="0.0" y="563" width="375" height="55"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="消費コイン" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bzd-Di-uiv">
+                                        <rect key="frame" x="322" y="27" width="50" height="14"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="9"/>
+                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tix-W7-81U">
+                                        <rect key="frame" x="8" y="6" width="34" height="34"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <state key="normal" image="img_insert_ico">
+                                            <color key="titleColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="tapSendImageBtn:" destination="vMz-47-Agb" eventType="touchUpInside" id="k8R-dG-g6w"/>
+                                        </connections>
+                                    </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="--" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jP9-VU-DlF">
+                                        <rect key="frame" x="344" y="12" width="26" height="16"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="10"/>
+                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="mcQ-YP-QcW" customClass="PlaceHolderTextView" customModule="swift_skyway" customModuleProvider="target">
+                                        <rect key="frame" x="45" y="6" width="250" height="36"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                    </textView>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="talk_send_ico" translatesAutoresizingMaskIntoConstraints="NO" id="8jO-98-71c">
+                                        <rect key="frame" x="298" y="11" width="27" height="27"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                    </imageView>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="coin_ico" translatesAutoresizingMaskIntoConstraints="NO" id="oud-RE-Q1U">
+                                        <rect key="frame" x="324" y="9" width="22" height="22"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                    </imageView>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DNf-23-5el">
+                                        <rect key="frame" x="293" y="4" width="73" height="38"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <connections>
+                                            <action selector="tapSendBtn:" destination="vMz-47-Agb" eventType="touchUpInside" id="EGk-6i-5mG"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="55" id="8cc-eK-y1t"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="hSM-W1-rFK"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="hSM-W1-rFK" firstAttribute="bottom" secondItem="H08-6i-h5w" secondAttribute="bottom" constant="49" id="9Mc-YR-8Bd"/>
+                            <constraint firstItem="H08-6i-h5w" firstAttribute="leading" secondItem="hSM-W1-rFK" secondAttribute="leading" id="Lws-lX-jjt"/>
+                            <constraint firstItem="H08-6i-h5w" firstAttribute="trailing" secondItem="hSM-W1-rFK" secondAttribute="trailing" id="Rvs-GO-8kh"/>
+                            <constraint firstItem="JWb-H9-hR0" firstAttribute="leading" secondItem="hSM-W1-rFK" secondAttribute="leading" id="V2v-W8-e4D"/>
+                            <constraint firstItem="JWb-H9-hR0" firstAttribute="top" secondItem="hSM-W1-rFK" secondAttribute="top" constant="60" id="WpF-gT-QAu"/>
+                            <constraint firstItem="H08-6i-h5w" firstAttribute="top" secondItem="JWb-H9-hR0" secondAttribute="bottom" constant="4" id="aho-fC-ngZ"/>
+                            <constraint firstItem="JWb-H9-hR0" firstAttribute="trailing" secondItem="hSM-W1-rFK" secondAttribute="trailing" id="qde-y7-ODC"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="coinIconImageView" destination="oud-RE-Q1U" id="HHR-tb-UyE"/>
+                        <outlet property="coinLabel" destination="jP9-VU-DlF" id="uyM-bT-fyR"/>
+                        <outlet property="coinTempLabel" destination="Bzd-Di-uiv" id="mUO-a2-Byc"/>
+                        <outlet property="sendBtn" destination="DNf-23-5el" id="kYm-ms-Cjr"/>
+                        <outlet property="sendImageBtn" destination="tix-W7-81U" id="kpv-qC-l7I"/>
+                        <outlet property="sendTextView" destination="mcQ-YP-QcW" id="by2-16-2s1"/>
+                        <outlet property="sendView" destination="H08-6i-h5w" id="RSr-Od-FcD"/>
+                        <outlet property="talkSendIcon" destination="8jO-98-71c" id="i4z-ZS-n0d"/>
+                        <outlet property="talkinfoTableView" destination="JWb-H9-hR0" id="kKM-nt-66n"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xUa-GL-Nt1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="848.79999999999995" y="96.7016491754123"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="coin_ico" width="30" height="30"/>
+        <image name="img_insert_ico" width="30" height="30"/>
+        <image name="talk_send_ico" width="30" height="30"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

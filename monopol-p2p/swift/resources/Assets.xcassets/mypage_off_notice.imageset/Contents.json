@@ -1,0 +1,23 @@
+{
+  "images" : [
+    {
+      "filename" : "mm_05_mypage_ico_off_30_notice.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "mm_05_mypage_ico_off_60_notice.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "mm_05_mypage_ico_off_90_notice.png",
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

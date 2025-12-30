@@ -1,0 +1,23 @@
+{
+  "images" : [
+    {
+      "filename" : "mm_04_dm_ico_off_30.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "mm_04_dm_ico_off_60-5.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "mm_04_dm_ico_off_60-6.png",
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

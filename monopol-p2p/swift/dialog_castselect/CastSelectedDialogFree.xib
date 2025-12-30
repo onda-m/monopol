@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" restorationIdentifier="CastSelectedDialog" id="oLx-tP-doY" customClass="CastSelectedDialogFree" customModule="swift_skyway" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="X9a-YS-Wva">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PLi-aO-I1h">
+                            <rect key="frame" x="0.0" y="183" width="375" height="300"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dJK-na-TIY">
+                                    <rect key="frame" x="1" y="40" width="372" height="64"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="10" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pE0-eD-cBw">
+                                    <rect key="frame" x="1" y="113" width="372" height="110"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                    <string key="text">※前の画面に戻り、右上のアイコンが
+「サシライブ中」アイコンから「待機中」
+アイコンに変わると、
+サシライブリクエストすることができます。</string>
+                                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                </view>
+            </subviews>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="X9a-YS-Wva" firstAttribute="leading" secondItem="cjQ-xL-cyj" secondAttribute="leading" id="Gcw-f9-fdc"/>
+                <constraint firstItem="X9a-YS-Wva" firstAttribute="bottom" secondItem="cjQ-xL-cyj" secondAttribute="bottom" id="NRb-ro-iB1"/>
+                <constraint firstItem="X9a-YS-Wva" firstAttribute="top" secondItem="cjQ-xL-cyj" secondAttribute="top" id="nFz-OE-a2c"/>
+                <constraint firstItem="X9a-YS-Wva" firstAttribute="trailing" secondItem="cjQ-xL-cyj" secondAttribute="trailing" id="wMw-8e-dyJ"/>
+            </constraints>
+            <viewLayoutGuide key="safeArea" id="cjQ-xL-cyj"/>
+            <connections>
+                <outlet property="mainLbl01" destination="dJK-na-TIY" id="rtJ-eM-Ubx"/>
+                <outlet property="mainLbl02" destination="pE0-eD-cBw" id="3DJ-Qe-JN2"/>
+                <outlet property="mainView" destination="X9a-YS-Wva" id="W6E-lz-lyP"/>
+            </connections>
+            <point key="canvasLocation" x="-271.19999999999999" y="-284.70764617691157"/>
+        </view>
+    </objects>
+</document>

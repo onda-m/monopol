@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_0" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="CastEffectDialog" customModule="swift_skyway" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2Y3-76-8Yd">
+                    <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Z8r-zv-Rrn">
+                            <rect key="frame" x="12" y="349" width="296" height="150"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                            <subviews>
+                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6Hv-vM-bUl">
+                                    <rect key="frame" x="26" y="31" width="140" height="20"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                    <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                    <state key="normal" title="エフェクト効果を解除"/>
+                                    <connections>
+                                        <action selector="tapEffectClear:" destination="iN0-l3-epB" eventType="touchUpInside" id="q2x-ej-bOq"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lhP-QK-yVC">
+                                    <rect key="frame" x="27" y="67" width="70" height="20"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                    <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                    <state key="normal" title="波エフェクト"/>
+                                    <connections>
+                                        <action selector="tapEffectBtn001:" destination="iN0-l3-epB" eventType="touchUpInside" id="n6O-Mw-Dmg"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Mza-M3-bOG">
+                                    <rect key="frame" x="113" y="67" width="70" height="20"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                    <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                    <state key="normal" title="パープル"/>
+                                    <connections>
+                                        <action selector="tapEffectBtn002:" destination="iN0-l3-epB" eventType="touchUpInside" id="wMV-sZ-Wgp"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JxF-TL-QNk">
+                                    <rect key="frame" x="200" y="67" width="70" height="20"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                    <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                    <state key="normal" title="ブルー"/>
+                                    <connections>
+                                        <action selector="tapEffectBtn003:" destination="iN0-l3-epB" eventType="touchUpInside" id="K8B-9J-G8z"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ren-0j-M5t">
+                                    <rect key="frame" x="27" y="103" width="70" height="20"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                    <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                    <state key="normal" title="スクリーン"/>
+                                    <connections>
+                                        <action selector="tapEffectBtn004:" destination="iN0-l3-epB" eventType="touchUpInside" id="yf6-hx-Jjx"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cMl-EL-CAg">
+                                    <rect key="frame" x="113" y="103" width="70" height="20"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                    <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                    <state key="normal" title="ホワイト"/>
+                                    <connections>
+                                        <action selector="tapEffectBtn005:" destination="iN0-l3-epB" eventType="touchUpInside" id="npe-h4-Q4a"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="exr-U6-aFE">
+                                    <rect key="frame" x="200" y="103" width="70" height="20"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
+                                    <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                    <state key="normal" title="画面をぼかす"/>
+                                    <connections>
+                                        <action selector="tapEffectBtn006:" destination="iN0-l3-epB" eventType="touchUpInside" id="Mps-D4-cVm"/>
+                                    </connections>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NKm-1W-EDv">
+                                    <rect key="frame" x="254" y="1" width="40" height="40"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
+                                    <inset key="imageEdgeInsets" minX="25" minY="5" maxX="5" maxY="25"/>
+                                    <state key="normal" image="cancel">
+                                        <color key="titleColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    </state>
+                                    <connections>
+                                        <action selector="tapCloseEffectListView:" destination="iN0-l3-epB" eventType="touchUpInside" id="DZ1-LK-Yy7"/>
+                                    </connections>
+                                </button>
+                            </subviews>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                </view>
+            </subviews>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="2Y3-76-8Yd" firstAttribute="bottom" secondItem="iN0-l3-epB" secondAttribute="bottom" id="3zR-u0-1SB"/>
+                <constraint firstItem="2Y3-76-8Yd" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="YNv-L7-MVd"/>
+                <constraint firstItem="2Y3-76-8Yd" firstAttribute="trailing" secondItem="iN0-l3-epB" secondAttribute="trailing" id="YOy-He-Sf6"/>
+                <constraint firstItem="2Y3-76-8Yd" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="kBo-UJ-UjW"/>
+            </constraints>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <connections>
+                <outlet property="clearBtn" destination="6Hv-vM-bUl" id="sdg-AJ-j52"/>
+                <outlet property="closeBtn" destination="NKm-1W-EDv" id="uAh-ps-Dmw"/>
+                <outlet property="effectBtn01" destination="lhP-QK-yVC" id="tEI-Vg-9AE"/>
+                <outlet property="effectBtn02" destination="Mza-M3-bOG" id="ArY-EZ-X9A"/>
+                <outlet property="effectBtn03" destination="JxF-TL-QNk" id="Day-FK-tG5"/>
+                <outlet property="effectBtn04" destination="Ren-0j-M5t" id="5yx-ko-D1G"/>
+                <outlet property="effectBtn05" destination="cMl-EL-CAg" id="hOb-f2-rsv"/>
+                <outlet property="effectBtn06" destination="exr-U6-aFE" id="jcq-zf-zcD"/>
+                <outlet property="effectListView" destination="Z8r-zv-Rrn" id="ST4-u8-sW6"/>
+                <outlet property="mainView" destination="2Y3-76-8Yd" id="Zgt-ZM-dDc"/>
+            </connections>
+            <point key="canvasLocation" x="101.25" y="52.816901408450704"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="cancel" width="30" height="30"/>
+    </resources>
+</document>
