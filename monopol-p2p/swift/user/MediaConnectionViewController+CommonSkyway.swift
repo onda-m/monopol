@@ -51,12 +51,8 @@ extension MediaConnectionViewController{
     func setup(){
             //waitviewと違うことに注意すること（waitviewにはif文がないsetup処理が待機するときに使うため）
             if(peer == nil || peer?.isDisconnected == true){
-                let option: SKWPeerOption = SKWPeerOption.init();
-                option.key = Util.skywayAPIKey
-                option.domain = Util.skywayDomain
+                peer = SkywayManager.shared.ensurePeer(id: String(self.user_id) + "-" + UtilFunc.getToday(format:"yyyyMMddHHmmss"), apiKey: Util.skywayAPIKey, domain: Util.skywayDomain)
 
-                peer = SKWPeer(id: String(self.user_id) + "-" + UtilFunc.getToday(format:"yyyyMMddHHmmss"), options: option)
-                
                 if let _peer = peer{
                     self.setupPeerCallBacks(peer: _peer)
                     self.setupStream(peer: _peer)
@@ -69,15 +65,12 @@ extension MediaConnectionViewController{
     func setupStream(peer:SKWPeer){
         //下記はエミュレーターだとエラーとなる
         //初回のみ実行＞iphone11がリスナーの場合、2度目以降も初期化が必要（画面が真っ黒になってしまう）
-        guard peer.isDestroyed == false else {
-            print("failed to initialize navigator: peer already destroyed")
-            return
-        }
-
-        SKWNavigator.initialize(peer)
         let constraints = SkywayManager.defaultConstraints()
-        appDelegate.localStream?.close()
-        appDelegate.localStream = SKWNavigator.getUserMedia(constraints)
+        if let localStream = SkywayManager.shared.prepareLocalStream(in: localStreamView, constraints: constraints) {
+            appDelegate.localStream = localStream
+        } else {
+            print("failed to create local stream")
+        }
 
         //20201120 comment out
         //appDelegate.localStream?.addVideoRenderer(self.localStreamView, track: 0)

@@ -54,6 +54,28 @@ final class SkywayManager: NSObject {
     }
 
     // MARK: Session
+    @discardableResult
+    func ensurePeer(id: String? = nil, delegate: SkywaySessionDelegate? = nil, apiKey: String? = nil, domain: String? = nil) -> SKWPeer? {
+        callbackQueue.sync {
+            if let peer = self.peer, peer.isDestroyed == false {
+                if let delegate = delegate {
+                    self.delegate = delegate
+                }
+                return peer
+            }
+
+            let option = SKWPeerOption()
+            option.key = apiKey ?? SkywayManager.apiKey
+            option.domain = domain ?? SkywayManager.domain
+
+            let peer = SKWPeer(id: id, options: option)
+            self.peer = peer
+            self.delegate = delegate
+            setPeerCallbacks(for: peer)
+            return peer
+        }
+    }
+
     func startSession(delegate: SkywaySessionDelegate, apiKey: String? = nil, domain: String? = nil) {
         self.delegate = delegate
 
@@ -61,13 +83,7 @@ final class SkywayManager: NSObject {
             return
         }
 
-        let option = SKWPeerOption()
-        option.key = apiKey ?? SkywayManager.apiKey
-        option.domain = domain ?? SkywayManager.domain
-
-        let peer = SKWPeer(options: option)
-        self.peer = peer
-        setPeerCallbacks(for: peer)
+        _ = ensurePeer(delegate: delegate, apiKey: apiKey, domain: domain)
     }
 
     func endSession() {

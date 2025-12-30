@@ -170,49 +170,12 @@ extension WaitViewController{
             self.view.bringSubviewToFront(self.busyIndicator)
         }
         
-        if(self.peer == nil || self.peer!.isDestroyed == true || self.peer!.isDisconnected == true){
-            let option: SKWPeerOption = SKWPeerOption.init();
-            option.key = Util.skywayAPIKey
-            option.domain = Util.skywayDomain
-
-            //idにはuser_idを入れる
-            self.peer = SKWPeer(id: String(self.user_id), options: option)
-            if let _peer = self.peer{
-                self.setupPeerCallBacks(peer: _peer)
-                self.setupStream(peer: _peer)
-            }else{
-                print("failed to create peer setup")
-            }
-        }else{
-            UtilFunc.isPeerIdExist(peer: self.peer!, peerId: String(self.user_id)){ (flg) in
-                if(flg == false){
-                    //接続されていない場合(バックグラウンドにある場合)
-                    //self.appDelegate.peer!.disconnect()
-                    //self.appDelegate.peer!.destroy()
-                    //self.appDelegate.peer = nil
-
-                    //正常状態(人的操作によるもの)にする
-                    self.listenerErrorFlg = 1
-                    self.appDelegate.localStream!.removeVideoRenderer(self.localStreamView, track: 0)
-                    
-                    let option: SKWPeerOption = SKWPeerOption.init();
-                    option.key = Util.skywayAPIKey
-                    option.domain = Util.skywayDomain
-                    
-                    //idにはuser_idを入れる
-                    self.peer = SKWPeer(id: String(self.user_id), options: option)
-                    
-                    if let _peer = self.peer{
-                        self.setupPeerCallBacks(peer: _peer)
-                        self.setupStream(peer: _peer)
-                    }else{
-                        print("failed to create peer setup")
-                    }
-                    
-                }else{
-                    //PEERだけが繋がっている場合
-                }
-            }
+        if let newPeer = SkywayManager.shared.ensurePeer(id: String(self.user_id), apiKey: Util.skywayAPIKey, domain: Util.skywayDomain) {
+            self.peer = newPeer
+            self.setupPeerCallBacks(peer: newPeer)
+            self.setupStream(peer: newPeer)
+        } else {
+            print("failed to create peer setup")
         }
         
         self.busyIndicator.removeFromSuperview()
@@ -223,22 +186,12 @@ extension WaitViewController{
             UtilFunc.deleteCastLock(cast_id:self.user_id, user_id:self.user_id, type:1)
         }
     }
-    
-    func setupStream(peer:SKWPeer){
-        guard peer.isDestroyed == false else {
-            print("failed to initialize navigator: peer already destroyed")
-            return
-        }
 
-        // 下記はエミュレーターだとエラーとなる
-        SKWNavigator.initialize(peer)
+    func setupStream(peer:SKWPeer){
         let constraints = SkywayManager.defaultConstraints()
 
-        appDelegate.localStream?.close()
-        appDelegate.localStream = SKWNavigator.getUserMedia(constraints)
-
-        if let localStream = appDelegate.localStream {
-            localStream.addVideoRenderer(localStreamView, track: 0)
+        if let localStream = SkywayManager.shared.prepareLocalStream(in: localStreamView, constraints: constraints) {
+            appDelegate.localStream = localStream
         } else {
             print("failed to create local stream")
         }
