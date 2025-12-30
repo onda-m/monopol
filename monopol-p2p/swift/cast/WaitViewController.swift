@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import SkyWay
+import SkyWaySupport
 import AVFoundation
 import ReverseExtension
 import Firebase
