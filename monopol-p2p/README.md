@@ -1,15 +1,15 @@
 # SkyWay iOS SDK Swift Sample
 
-```
-swift 4.0以上
-Xcode 9.0以上
-ios 9.0以上
-Cocoapods 1.0.0以上
+## 対応環境
 
+```
+Swift 5.0以上
+Xcode 12.0以上
+iOS 13.0以上
+CocoaPods 1.10.0以上
 ```
 
 ## 機能
-
 
 - 1-1の映像サンプル
 - 1-1のチャットサンプル
@@ -17,6 +17,8 @@ Cocoapods 1.0.0以上
 ## セットアップ
 
 ### 1. ライブラリのインストール
+
+Podfile に SkyWay の公式 Specs レポジトリを追加済みです。`monopol-p2p` ディレクトリで以下を実行して依存ライブラリを取得してください。
 
 ```
 $ pod install
@@ -41,4 +43,6 @@ var skywayDomain:String? = "xxx"
 3. `joinRoom(named:)` でメッシュ/ SFU ルームへ参加し、`SkywaySessionDelegate` でリモートストリームの増減を受け取る。
 4. 退室や画面終了時は `leaveRoom()` や `endSession()` を呼び、ストリームと Peer を確実に破棄する。
 
-コールバックはメインスレッドへ配送されるため、UI の更新を直接行えます。Room の publish/subscribe の状態変化は `SkywaySessionDelegate` で受け取り、必要に応じて `joinRoom` 呼び出し時の `optionBuilder` で SkyWay の `SKWRoomOption` をカスタマイズしてください。Peer ID を持たないストリームも破棄漏れなくクリーンアップされるようになっています。
+コールバックはメインスレッドへ配送されるため、UI の更新を直接行えます。Room の publish/subscribe の状態変化は `SkywaySessionDelegate` で受け取り、必要に応じて `joinRoom` 呼び出し時の `optionBuilder` で SkyWay の `SKWRoomOption` をカスタマイズしてください。
+
+Peer ID を持たないストリームも破棄漏れなくクリーンアップされるようになっています。
