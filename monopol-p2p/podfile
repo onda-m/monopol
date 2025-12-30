@@ -1,9 +1,17 @@
-# platform :ios,'13.0'
-use_frameworks!
+# Define the sources recommended by the SkyWay official site so the SDK and its
+# WebRTC dependencies can be resolved correctly.
+source 'https://github.com/skyway/skyway-ios-sdk-specs.git'
+source 'https://github.com/skyway/skyway-ios-webrtc-specs.git'
+source 'https://github.com/CocoaPods/Specs.git'
 
-def install_pods
+platform :ios, '13.0'
+
+target 'swift_skyway' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  use_frameworks!
+
+  pod 'SkyWayRoom'
   pod 'SwiftyGif'
-  pod 'SkyWay', '~> 4.6'
   pod 'ReachabilitySwift'
   pod 'PINRemoteImage'
   pod 'XLPagerTabStrip', '~> 8.1'
@@ -28,8 +36,3 @@ post_install do |installer|
     end
   end
 end
-
-target 'swift_skyway' do
-  install_pods
-end
-
