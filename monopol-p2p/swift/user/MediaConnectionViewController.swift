@@ -5,7 +5,7 @@
 //
 
 import UIKit
-import SkyWay
+import SkyWaySupport
 import ReverseExtension
 import Firebase
 import FirebaseDatabase

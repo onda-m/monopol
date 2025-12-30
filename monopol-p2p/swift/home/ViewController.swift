@@ -5,7 +5,7 @@
 //
 
 import UIKit
-import SkyWay
+import SkyWaySupport
 import XLPagerTabStrip
 //import FirebaseStorage
 

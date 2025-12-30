@@ -6,7 +6,7 @@
 //  Copyright © 2018年 worldtrip. All rights reserved.
 //
 
-import SkyWay
+import SkyWaySupport
 import Foundation
 import UIKit
 //import Firebase

@@ -6,7 +6,7 @@
 
 import UIKit
 import StoreKit
-import SkyWay
+import SkyWaySupport
 import Firebase
 import Reachability
 import UserNotifications

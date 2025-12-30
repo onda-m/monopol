@@ -8,7 +8,7 @@
 
 import Foundation
 import UIKit
-import SkyWay
+import SkyWaySupport
 import AVFoundation
 
 protocol SkywaySessionDelegate: AnyObject {
