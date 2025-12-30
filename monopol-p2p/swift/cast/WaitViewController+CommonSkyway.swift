@@ -136,6 +136,10 @@ extension WaitViewController{
         self.peer!.on(.PEER_EVENT_DISCONNECTED, callback: nil)
         self.peer!.on(.PEER_EVENT_ERROR, callback: nil)
 
+        self.appDelegate.localStream?.close()
+        self.appDelegate.localStream = nil
+        SKWNavigator.terminate()
+
         self.peer!.destroy()
         self.peer = nil
     }
@@ -221,12 +225,23 @@ extension WaitViewController{
     }
     
     func setupStream(peer:SKWPeer){
-        //下記はエミュレーターだとエラーとなる
-        SKWNavigator.initialize(peer)
-        let constraints:SKWMediaConstraints = SKWMediaConstraints()
-        self.appDelegate.localStream = SKWNavigator.getUserMedia(constraints)
+        guard peer.isDestroyed == false else {
+            print("failed to initialize navigator: peer already destroyed")
+            return
+        }
 
-        self.appDelegate.localStream?.addVideoRenderer(self.localStreamView, track: 0)
+        // 下記はエミュレーターだとエラーとなる
+        SKWNavigator.initialize(peer)
+        let constraints = SkywayManager.defaultConstraints()
+
+        appDelegate.localStream?.close()
+        appDelegate.localStream = SKWNavigator.getUserMedia(constraints)
+
+        if let localStream = appDelegate.localStream {
+            localStream.addVideoRenderer(localStreamView, track: 0)
+        } else {
+            print("failed to create local stream")
+        }
     }
     
     //通話の接続

@@ -39,9 +39,11 @@ extension MediaConnectionViewController{
         self.peer!.on(.PEER_EVENT_CALL, callback: nil)
         self.peer!.on(.PEER_EVENT_DISCONNECTED, callback: nil)
         self.peer!.on(.PEER_EVENT_ERROR, callback: nil)
-        
-        //SKWNavigator.terminate()
-        
+
+        self.appDelegate.localStream?.close()
+        self.appDelegate.localStream = nil
+        SKWNavigator.terminate()
+
         self.peer!.destroy()
         self.peer = nil
     }
@@ -67,12 +69,18 @@ extension MediaConnectionViewController{
     func setupStream(peer:SKWPeer){
         //下記はエミュレーターだとエラーとなる
         //初回のみ実行＞iphone11がリスナーの場合、2度目以降も初期化が必要（画面が真っ黒になってしまう）
+        guard peer.isDestroyed == false else {
+            print("failed to initialize navigator: peer already destroyed")
+            return
+        }
+
         SKWNavigator.initialize(peer)
-        let constraints:SKWMediaConstraints = SKWMediaConstraints()
-        self.appDelegate.localStream = SKWNavigator.getUserMedia(constraints)
-        
+        let constraints = SkywayManager.defaultConstraints()
+        appDelegate.localStream?.close()
+        appDelegate.localStream = SKWNavigator.getUserMedia(constraints)
+
         //20201120 comment out
-        //self.appDelegate.localStream?.addVideoRenderer(self.localStreamView, track: 0)
+        //appDelegate.localStream?.addVideoRenderer(self.localStreamView, track: 0)
     }
     
     //通話の接続
