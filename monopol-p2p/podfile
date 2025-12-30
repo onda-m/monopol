@@ -3,7 +3,7 @@ use_frameworks!
 
 def install_pods
   pod 'SwiftyGif'
-  pod 'SkyWay'
+  pod 'SkyWay', '~> 4.6'
   pod 'ReachabilitySwift'
   pod 'PINRemoteImage'
   pod 'XLPagerTabStrip', '~> 8.1'

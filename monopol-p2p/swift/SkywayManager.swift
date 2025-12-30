@@ -20,6 +20,17 @@ protocol SkywaySessionDelegate: AnyObject {
     func skywayManager(_ manager: SkywayManager, didReceiveError error: Error?)
 }
 
+enum SkywayConfigurationError: LocalizedError {
+    case missingCredentials
+
+    var errorDescription: String? {
+        switch self {
+        case .missingCredentials:
+            return "SkyWay API Key または Domain が設定されていません。新SkyWayのコンソールで発行した値を設定してください。"
+        }
+    }
+}
+
 extension SkywaySessionDelegate {
     func skywayManagerDidOpenPeer(_ manager: SkywayManager, peerId: String) {}
     func skywayManagerDidJoinRoom(_ manager: SkywayManager, roomName: String) {}
@@ -61,9 +72,17 @@ final class SkywayManager: NSObject {
             return
         }
 
+        let resolvedApiKey = (apiKey ?? SkywayManager.apiKey).trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedDomain = (domain ?? SkywayManager.domain).trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !resolvedApiKey.isEmpty, !resolvedDomain.isEmpty else {
+            notifyDelegate { $0.skywayManager(self, didReceiveError: SkywayConfigurationError.missingCredentials) }
+            return
+        }
+
         let option = SKWPeerOption()
-        option.key = apiKey ?? SkywayManager.apiKey
-        option.domain = domain ?? SkywayManager.domain
+        option.key = resolvedApiKey
+        option.domain = resolvedDomain
 
         let peer = SKWPeer(options: option)
         self.peer = peer

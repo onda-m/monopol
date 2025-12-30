@@ -76,7 +76,7 @@ class Util {
     static let DOMAIN_BASE = "jbh36p8c.user.webaccel.jp"
     static let URL_USER_PHOTO_BASE = "https://jbh36p8c.user.webaccel.jp/"//画像URLの共通部分(ストリーミング)
     static let URL_USER_MOVIE_BASE = "https://jbh36p8c.user.webaccel.jp/cast_movies/"//動画URLの共通部分(ストリーミング)
-    // https://webrtc.ecl.ntt.com/からAPIKeyとDomainを取得してください
+    // https://console.skyway.ntt.com/ からAPI KeyとDomainを取得してください（新SkyWay対応）
     static let skywayAPIKey: String = "892b648f-98c5-4b9a-b02f-79133280483d"
     static let skywayDomain: String = "localhost"
     //firebaseのサーバーキー
@@ -127,7 +127,7 @@ class Util {
     static let DOMAIN_BASE = "ancuvcdg.user.webaccel.jp"
     static let URL_USER_PHOTO_BASE = "https://ancuvcdg.user.webaccel.jp/"//画像URLの共通部分(ストリーミング)
     static let URL_USER_MOVIE_BASE = "https://ancuvcdg.user.webaccel.jp/cast_movies/"//動画URLの共通部分(ストリーミング)
-    // https://webrtc.ecl.ntt.com/からAPIKeyとDomainを取得してください
+    // https://console.skyway.ntt.com/ からAPI KeyとDomainを取得してください（新SkyWay対応）
     static let skywayAPIKey: String = "d53e1b48-2ef6-4649-93e4-3a69c66b6e28"
     static let skywayDomain: String = "localhost"
     //firebaseのサーバーキー
