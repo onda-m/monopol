@@ -26,7 +26,7 @@ $ pod install
 
 ```
 // AppDelegate.swift
-// https://webrtc.ecl.ntt.com/からAPIKeyとDomainを取得してください
+// https://console.skyway.ntt.com/ からAPI KeyとDomainを取得してください（新SkyWay対応）
 var skywayAPIKey:String? = "xxx"
 var skywayDomain:String? = "xxx"
 
