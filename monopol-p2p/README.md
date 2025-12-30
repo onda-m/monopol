@@ -26,13 +26,7 @@ $ pod install
 
 ### 2. APIKEY, DOMAINの書き換え
 
-```
-// AppDelegate.swift
-// https://console.skyway.ntt.com/ からAPI KeyとDomainを取得してください（新SkyWay対応）
-var skywayAPIKey:String? = "xxx"
-var skywayDomain:String? = "xxx"
-
-```
+`swift/SkywayManager.swift` 内の `apiKey` と `domain` を、新SkyWay コンソールで発行した値に差し替えてください。テンプレートのままでは接続前にエラー通知が返るため、確実に設定漏れを検知できます。
 
 ## SkyWay Room SDK を使った接続フロー
 

@@ -75,7 +75,12 @@ final class SkywayManager: NSObject {
         let resolvedApiKey = (apiKey ?? SkywayManager.apiKey).trimmingCharacters(in: .whitespacesAndNewlines)
         let resolvedDomain = (domain ?? SkywayManager.domain).trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard !resolvedApiKey.isEmpty, !resolvedDomain.isEmpty else {
+        guard
+            !resolvedApiKey.isEmpty,
+            resolvedApiKey != "<あなたのID>",
+            !resolvedDomain.isEmpty,
+            resolvedDomain != "<あなたの指定したdomain>"
+        else {
             notifyDelegate { $0.skywayManager(self, didReceiveError: SkywayConfigurationError.missingCredentials) }
             return
         }
