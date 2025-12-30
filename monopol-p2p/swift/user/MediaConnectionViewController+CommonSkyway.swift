@@ -34,17 +34,13 @@ extension MediaConnectionViewController{
     }
     
     func sessionClose() {
-        self.peer!.on(.PEER_EVENT_OPEN, callback: nil)
-        self.peer!.on(.PEER_EVENT_CLOSE, callback: nil)
-        self.peer!.on(.PEER_EVENT_CALL, callback: nil)
-        self.peer!.on(.PEER_EVENT_DISCONNECTED, callback: nil)
-        self.peer!.on(.PEER_EVENT_ERROR, callback: nil)
+        self.peer?.on(.PEER_EVENT_OPEN, callback: nil)
+        self.peer?.on(.PEER_EVENT_CLOSE, callback: nil)
+        self.peer?.on(.PEER_EVENT_CALL, callback: nil)
+        self.peer?.on(.PEER_EVENT_DISCONNECTED, callback: nil)
+        self.peer?.on(.PEER_EVENT_ERROR, callback: nil)
 
-        self.appDelegate.localStream?.close()
-        self.appDelegate.localStream = nil
-        SKWNavigator.terminate()
-
-        self.peer!.destroy()
+        SkywayManager.shared.endSession()
         self.peer = nil
     }
     
