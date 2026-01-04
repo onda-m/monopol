@@ -6,7 +6,7 @@
 //  Copyright © 2018年 worldtrip. All rights reserved.
 //
 
-import SkyWaySupport
+import SkyWayRoom
 import AVFoundation
 
 // MARK: setup skyway
