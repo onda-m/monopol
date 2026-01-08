@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		07B67C5000B9F2D5A17F24A4 /* Pods_swift_skyway.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CB898CFBA44DE3FAAD15BC5 /* Pods_swift_skyway.framework */; };
+		8E6A719E536748C8B2397C2D /* SkyWaySupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BBBCCD25BE34F92AF02F760 /* SkyWaySupport.swift */; };
 		6F0196DD1FB932C0003D22D2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0196DC1FB932C0003D22D2 /* AppDelegate.swift */; };
 		6F0196DF1FB932C0003D22D2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0196DE1FB932C0003D22D2 /* ViewController.swift */; };
 		6F0196E21FB932C0003D22D2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6F0196E01FB932C0003D22D2 /* Main.storyboard */; };
@@ -295,6 +296,7 @@
 		A30C471A22757C97008BB1DF /* UtilStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilStruct.swift; sourceTree = "<group>"; };
 		A30F4BED22C6402800F52253 /* MaintenanceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaintenanceViewController.swift; sourceTree = "<group>"; };
 		A30FE25C20E2B95F00BC2B86 /* Setting.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Setting.storyboard; sourceTree = "<group>"; };
+		9BBBCCD25BE34F92AF02F760 /* SkyWaySupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyWaySupport.swift; sourceTree = "<group>"; };
 		A30FE25F20E2BA6900BC2B86 /* ProfileSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSettingViewController.swift; sourceTree = "<group>"; };
 		A30FE26120E404D300BC2B86 /* PairRankingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairRankingViewController.swift; sourceTree = "<group>"; };
 		A314DEBA20C4238A00FDEA42 /* MypageMenuViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MypageMenuViewCell.xib; sourceTree = "<group>"; };
@@ -687,6 +689,7 @@
 				A3DCE702217BB96900694155 /* PhotoLibraryManager.swift */,
 				A389F49E229925F500EF28FA /* CheckBox.swift */,
 				A3640D8922EE7D43008DB630 /* FaceTracker.swift */,
+				9BBBCCD25BE34F92AF02F760 /* SkyWaySupport.swift */,
 				BF5E3B6A2542408600B1C80A /* TriangleButton.swift */,
 			);
 			path = common;
@@ -1147,6 +1150,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E6A719E536748C8B2397C2D /* SkyWaySupport.swift in Sources */,
 				BF5E3B6B2542408800B1C80A /* TriangleButton.swift in Sources */,
 				A3DE2BB620B77FB400C3315F /* BusyIndicator.swift in Sources */,
 				A3A5E1022099059500F3CC71 /* Maintoolbarview.swift in Sources */,
