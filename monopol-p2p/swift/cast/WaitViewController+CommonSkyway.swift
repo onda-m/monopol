@@ -8,6 +8,9 @@
 
 import SkyWayRoom
 import AVFoundation
+#if canImport(SkyWay)
+import SkyWay
+#endif
 
 // MARK: setup skyway
 extension WaitViewController{

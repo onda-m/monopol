@@ -14,6 +14,9 @@ import Firebase
 import FirebaseAuth
 import FirebaseDatabase
 //import SwiftyGif
+#if canImport(SkyWay)
+import SkyWay
+#endif
 
 class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabBarDelegate,UICollectionViewDataSource,UICollectionViewDelegate,UICollectionViewDelegateFlowLayout {
     
