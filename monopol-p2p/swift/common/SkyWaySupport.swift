@@ -94,6 +94,7 @@ public class SKWMediaStream {
     public func addVideoRenderer(_ renderer: SKWVideo?, track: NSNumber?) {}
     public func removeVideoRenderer(_ renderer: SKWVideo?, track: NSNumber?) {}
     public func close() {}
+    public func setEnableAudioTrack(_ index: Int, enable: Bool) {}
 }
 
 public class SKWVideo: UIView {
@@ -170,6 +171,8 @@ public class SKWDataConnection {
     public func on(_ event: SKWDataConnectionEventEnum, callback: @escaping SKWEventCallback) {
         callbacks[event] = callback
     }
+
+    public func send(_ data: Any) {}
 
     public func close() {}
 }
