@@ -122,9 +122,9 @@ extension WaitViewController{
 
         if self.mediaConnection != nil{
             self.mediaConnection!.close()
-            self.mediaConnection!.on(.MEDIACONNECTION_EVENT_STREAM, callback: nil)
-            self.mediaConnection!.on(.MEDIACONNECTION_EVENT_CLOSE, callback: nil)
-            self.mediaConnection!.on(.MEDIACONNECTION_EVENT_ERROR, callback: nil)
+            self.mediaConnection!.on(.MEDIACONNECTION_EVENT_STREAM, callback: { _ in })
+            self.mediaConnection!.on(.MEDIACONNECTION_EVENT_CLOSE, callback: { _ in })
+            self.mediaConnection!.on(.MEDIACONNECTION_EVENT_ERROR, callback: { _ in })
             self.mediaConnection = nil
         }
         
@@ -133,11 +133,11 @@ extension WaitViewController{
     }
     
     func sessionClose() {
-        self.peer!.on(.PEER_EVENT_OPEN, callback: nil)
-        self.peer!.on(.PEER_EVENT_CLOSE, callback: nil)
-        self.peer!.on(.PEER_EVENT_CALL, callback: nil)
-        self.peer!.on(.PEER_EVENT_DISCONNECTED, callback: nil)
-        self.peer!.on(.PEER_EVENT_ERROR, callback: nil)
+        self.peer!.on(.PEER_EVENT_OPEN, callback: { _ in })
+        self.peer!.on(.PEER_EVENT_CLOSE, callback: { _ in })
+        self.peer!.on(.PEER_EVENT_CALL, callback: { _ in })
+        self.peer!.on(.PEER_EVENT_DISCONNECTED, callback: { _ in })
+        self.peer!.on(.PEER_EVENT_ERROR, callback: { _ in })
 
         self.peer!.destroy()
         self.peer = nil

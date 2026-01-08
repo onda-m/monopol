@@ -88,7 +88,7 @@ public class SKWMediaConstraints {
     public var minHeight: UInt = 0
 }
 
-public class SKWMediaStream {
+public class SKWMediaStream: NSObject {
     public init() {}
     public var peerId: String?
     public func addVideoRenderer(_ renderer: SKWVideo?, track: NSNumber?) {}
@@ -177,3 +177,18 @@ public class SKWDataConnection {
     public func close() {}
 }
 #endif
+
+extension SKWMediaStream {
+    func setEnableVideoTrackCompat(_ index: Int, enable: Bool) {
+        let primarySelector = Selector(("setEnableVideoTrack:enable:"))
+        if let streamObject = self as? NSObject, streamObject.responds(to: primarySelector) {
+            streamObject.perform(primarySelector, with: NSNumber(value: index), with: NSNumber(value: enable))
+            return
+        }
+
+        let alternateSelector = Selector(("setEnableVideoTrack:enabled:"))
+        if let streamObject = self as? NSObject, streamObject.responds(to: alternateSelector) {
+            streamObject.perform(alternateSelector, with: NSNumber(value: index), with: NSNumber(value: enable))
+        }
+    }
+}

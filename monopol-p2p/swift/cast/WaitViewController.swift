@@ -906,7 +906,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             self.castWaitDialog.delMessageDo()
         }
     }
-
+        self.appDelegate.localStream?.setEnableVideoTrackCompat(0, enable: false)
     /*
     //未使用
     func GetImage() -> UIImage{
@@ -1149,8 +1149,8 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         //print("タップ")
         //ツールバーを表示する(念のため)
         myTabBar.isHidden = true
-        captureToolbar.isHidden = false
-        self.view.bringSubviewToFront(captureToolbar)
+            self.appDelegate.localStream?.setEnableVideoTrackCompat(0, enable: true)
+            self.appDelegate.localStream?.setEnableVideoTrackCompat(0, enable: true)
 
         takeStillPicture()
     }
