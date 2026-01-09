@@ -89,7 +89,9 @@ public class SKWMediaConstraints {
 }
 
 public class SKWMediaStream: NSObject {
-    public init() {}
+    public override init() {
+        super.init()
+    }
     public var peerId: String?
     public func addVideoRenderer(_ renderer: SKWVideo?, track: NSNumber?) {}
     public func removeVideoRenderer(_ renderer: SKWVideo?, track: NSNumber?) {}
