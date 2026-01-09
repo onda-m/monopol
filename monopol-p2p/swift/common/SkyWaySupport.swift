@@ -193,4 +193,9 @@ extension SKWMediaStream {
             streamObject.perform(alternateSelector, with: NSNumber(value: index), with: NSNumber(value: enable))
         }
     }
+
+    @available(*, deprecated, message: "Use setEnableVideoTrackCompat(_:enable:) instead.")
+    func setEnableVideoTrack(_ index: Int, enable: Bool) {
+        setEnableVideoTrackCompat(index, enable: enable)
+    }
 }
