@@ -905,7 +905,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             self.castWaitDialog.delMessageDo()
         }
     }
-        self.appDelegate.localStream?.setEnableVideoTrackCompat(0, enable: false)
+        //self.appDelegate.localStream?.setEnableVideoTrackCompat(0, enable: false)
     /*
     //未使用
     func GetImage() -> UIImage{
