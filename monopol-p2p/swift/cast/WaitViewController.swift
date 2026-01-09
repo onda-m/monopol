@@ -881,8 +881,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
                     }else{
                         //１分 - bufferをすでに過ぎている場合
                         //そのまま待機状態へ(リスナーは延長できず終了)
-                        self.listenerStatus = 2//２になると復帰ができない状態
-                        
+        self.appDelegate.localStream?.setEnableVideoTrackCompat(0, enable: false)
                         self.commonWaitDo(status:1)
                     }
                 }
