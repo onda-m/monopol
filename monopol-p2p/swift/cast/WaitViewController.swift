@@ -1151,7 +1151,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         myTabBar.isHidden = true
             self.appDelegate.localStream?.setEnableVideoTrackCompat(0, enable: true)
             self.appDelegate.localStream?.setEnableVideoTrackCompat(0, enable: true)
-
+            self.appDelegate.localStream?.setEnableVideoTrackCompat(0, enable: true)
             self.appDelegate.localStream?.setEnableVideoTrackCompat(0, enable: true)
     }
     
