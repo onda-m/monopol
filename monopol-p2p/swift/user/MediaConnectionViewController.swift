@@ -191,7 +191,7 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
     /*************************************/
     //skyway関連
     /*************************************/
-    var dataConnection: SKWDataConnection?
+    private let roomSession = SkyWayRoomSession()
 
     var messages = [Message]()
     struct Message{
@@ -203,18 +203,13 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
         var text:String?
     }
     
-    var peer: SKWPeer?
-    var mediaConnection: SKWMediaConnection?
-    //var localStream: SKWMediaStream?
-    var remoteStream: SKWMediaStream?
     
     //チャットやりとりのリストの部分
     @IBOutlet weak var messageTableView: UITableView!
 
     //コールバック用
-    //var dc: SKWDataConnection? = nil
-    @IBOutlet weak var localStreamView: SKWVideo!
-    @IBOutlet weak var remoteStreamView: SKWVideo!
+    @IBOutlet weak var localStreamView: SkyWayVideoView!
+    @IBOutlet weak var remoteStreamView: SkyWayVideoView!
     /*************************************/
     //skyway関連(ここまで)
     /*************************************/
@@ -711,10 +706,6 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
             self.call(targetPeerId: self.liveCastId)
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.mediaConnection!.close()
-        }
-        
         self.send(text: "画面リフレッシュ")
         */
     }
@@ -1024,10 +1015,6 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
             //何もしない
         }else{
             //ライブ配信終了へ
-            //self.mediaConnection?.close()
-            //self.dataConnection?.close()
-            //self.peer?.disconnect()
-            //self.peer?.destroy()
             self.closeMedia()
             self.sessionClose()
         }
@@ -1352,10 +1339,10 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
         self.appDelegate.request_password = "0"
         self.appDelegate.request_cast_id = 0//選択中（かつ申請中）のキャスト
         
-        self.remoteStream?.removeVideoRenderer(self.remoteStreamView, track: 0)
-        self.remoteStream = nil
-        self.mediaConnection = nil
-        self.dataConnection = nil
+        if let remoteStream = roomSession.remoteVideoStream {
+            self.remoteStreamView.detach(from: remoteStream)
+        }
+        roomSession.leave()
         
         print("close 通話")
         
