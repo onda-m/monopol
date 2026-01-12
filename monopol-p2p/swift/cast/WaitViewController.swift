@@ -14,9 +14,6 @@ import Firebase
 import FirebaseAuth
 import FirebaseDatabase
 //import SwiftyGif
-#if canImport(SkyWay)
-import SkyWay
-#endif
 
 class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabBarDelegate,UICollectionViewDataSource,UICollectionViewDelegate,UICollectionViewDelegateFlowLayout {
     
@@ -29,7 +26,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     //選択した時に重ねるView
     var castSelectedDialog = UINib(nibName: "CastSelectedDialog", bundle: nil).instantiate(withOwner: self,options: nil)[0] as! CastSelectedDialog
     let iconSize: CGFloat = 16.0//ライブ時間の左側のアイコンの大きさ
-    var first_flg = 0//1だとSKWMediaConstraintsを設定してはならない
+    var first_flg = 0//1だとカメラ制約を設定してはならない
     
     private var myTabBar:UITabBar!
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -96,7 +93,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     /*************************************/
     //skyway関連
     /*************************************/
-    var dataConnection: SKWDataConnection?
+    private let roomSession = SkyWayRoomSession()
     var messages = [Message]()
     struct Message{
         enum SenderType:String{
@@ -107,15 +104,8 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         var text:String?
     }
 
-    //ストリーマー側ライブ配信の接続用
-    var peer: SKWPeer?
-    //var peer_temp: SKWPeer?//ダミー用
-    var mediaConnection: SKWMediaConnection?
-    //var localStream: SKWMediaStream?
-//    var remoteStream: SKWMediaStream?//重要
-    
-    @IBOutlet weak var localStreamView: SKWVideo!
-    @IBOutlet weak var remoteStreamView: SKWVideo!//使用しないのでhiddenに
+    @IBOutlet weak var localStreamView: SkyWayVideoView!
+    @IBOutlet weak var remoteStreamView: SkyWayVideoView!//使用しないのでhiddenに
     /*************************************/
     //skyway関連(ここまで)
     /*************************************/
@@ -561,12 +551,12 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         self.castWaitDialog.topInfoLabel.isHidden = true
         
         //くるくる表示開始
-        if(self.busyIndicator.isDescendant(of: self.view)){
+        if self.busyIndicator.isDescendant(of: self.view) {
             //すでに追加(addsubview)済み
             //画面サイズに合わせる
             self.busyIndicator.frame = self.view.frame
             self.view.bringSubviewToFront(self.busyIndicator)
-        }else{
+        } else {
             //画面サイズに合わせる
             self.busyIndicator.frame = self.view.frame
             // 貼り付ける
@@ -682,33 +672,11 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             //print("フォアグラウンド復帰時")
             //self.setup()
 
-            UtilFunc.isPeerIdExist(peer: self.peer!, peerId: String(self.user_id)){ (flg) in
-                if(flg == false){
-                    //接続されていない場合(バックグラウンドにある場合)
-                    //正常状態(人的操作によるもの)にする
-                    self.listenerErrorFlg = 1
-                    self.appDelegate.localStream!.removeVideoRenderer(self.localStreamView, track: 0)
-                    
-                    let option: SKWPeerOption = SKWPeerOption.init();
-                    option.key = Util.skywayAPIKey
-                    option.domain = Util.skywayDomain
-                    
-                    //peer = SKWPeer(options: option)
-                    //idにはuser_idを入れる
-                    self.peer = SKWPeer(id: String(self.user_id), options: option)
-                    
-                    if let _peer = self.peer{
-                        self.setupPeerCallBacks(peer: _peer)
-                        self.setupStream(peer: _peer)
-                    }else{
-                        print("failed to create peer setup")
-                    }
-                    
-                }else{
-                    //PEERだけが繋がっている場合
-                    //一旦ローカルストリームをクローズ(必須)
-                    //if(self.localStream != nil){
-                }
+            if roomSession.room == nil {
+                //接続されていない場合(バックグラウンドにある場合)
+                //正常状態(人的操作によるもの)にする
+                self.listenerErrorFlg = 1
+                self.setup()
             }
             
             //もしタイマーが停止中だったら実行
@@ -716,18 +684,6 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         }
     }
     
-    /*
-    @objc func viewWillEnterForeground(_ notification: Notification?) {
-        if (self.isViewLoaded && (self.view.window != nil)) {
-            UtilLog.printf(str: "フォアグラウンド")
-            
-            //skywayの待機処理
-            if(peer == nil || peer?.isDisconnected == true){
-                self.set_up()
-            }
-        }
-    }*/
-
     @objc func viewDidEnterBackground(_ notification: Notification?) {
         if (self.isViewLoaded && (self.view.window != nil)) {
             //print("バックグラウンド")
@@ -880,9 +836,10 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
                         
                     }else{
                         //１分 - bufferをすでに過ぎている場合
-                        //そのまま待機状態へ(リスナーは延長できず終了)
-        self.appDelegate.localStream?.setEnableVideoTrackCompat(0, enable: false)
-                        self.commonWaitDo(status:1)
+        roomSession.setLocalVideoEnabled(false)
+
+        //roomSession.setLocalVideoEnabled(false)
+        roomSession.setLocalVideoEnabled(false)
                     }
                 }
             }
@@ -1122,15 +1079,12 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             castPhotoDialog.frame = self.view.frame
             
             // 貼り付ける
-            self.view.addSubview(castPhotoDialog)
-        }else{
-            //待機状態の時は選択できないように
-        }
+        roomSession.setLocalVideoEnabled(true)
     }
     
     //未使用
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
-        // section数は１つ
+            roomSession.setLocalVideoEnabled(true)
+            roomSession.setLocalVideoEnabled(true)
         return 1
     }
     
@@ -1244,17 +1198,20 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         if(self.appDelegate.live_target_user_id > 0){
             //ライブ配信中
             //写真ダイアログを表示
-            let castPhotoDialog:CastPhotoDialog = UINib(nibName: "CastPhotoDialog", bundle: nil).instantiate(withOwner: self,options: nil)[0] as! CastPhotoDialog
-            //画面サイズに合わせる
-            castPhotoDialog.frame = self.view.frame
-            
-            // 貼り付ける
-            self.view.addSubview(castPhotoDialog)
-        }else{
-            //待機状態の時は「送信」でなく「保存」
-            //写真ダイアログを表示
-            let castPhotoDialog:CastScreenshotDialog = UINib(nibName: "CastScreenshotDialog", bundle: nil).instantiate(withOwner: self,options: nil)[0] as! CastScreenshotDialog
-            //画面サイズに合わせる
+        self.request_handler = self.castWaitConditionRef.observe(.value) { [weak self] (snap: DataSnapshot) in
+            guard let self = self else { return }
+                guard let dict = snapshot.value as? [String: Any] else {
+                    continue
+                }
+                    if roomSession.room == nil {
+                        //接続されていない場合(バックグラウンドにある場合)
+                        //ここでは何もしない＞処理は、WaitViewController+CommonSkywayの待機完了後に行う。
+                    } else {
+                        //フォアグラウンドにある場合
+                        self.castWaitDialog.requestDialogDo()
+        if self.request_handler != 0 {
+            self.castWaitConditionRef.removeObserver(withHandle: self.request_handler)
+        }
             castPhotoDialog.frame = self.view.frame
             
             // 貼り付ける
@@ -1404,12 +1361,9 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         
         //UIAlertControllerにキャンセルのアクションを追加する
         let cancelAction = UIAlertAction(title: "配信を続ける", style: UIAlertAction.Style.cancel, handler: {
-            (action: UIAlertAction!) in
-            //print("キャンセルのシートが押されました。")
-        })
-        actionAlert.addAction(cancelAction)
-        
-        // iPadでは必須！
+        if self.busyIndicator.isDescendant(of: self.view) {
+        } else {
+        roomSession.leave()
         actionAlert.popoverPresentationController?.sourceView = self.view
         
         // ここで表示位置を調整。xは画面中央、yは画面下部になる様に指定
@@ -1519,6 +1473,9 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         // アプリ起動時・フォアグラウンド復帰時の通知を設定する
         //iOS9からremoveは必要ない？
         self.center.addObserver(
+}//メインのクラスはここまで
+
+extension WaitViewController {
             self,
             selector: #selector(self.onDidBecomeActive(_:)),
             name: UIApplication.didBecomeActiveNotification,
@@ -1725,7 +1682,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
                         self.strConnectLevel = obj.connect_level//絆レベル
                         
                         break
-                    }
+}
                     
                     //print(json.result)
                     dispatchGroup.leave()//サブタスク終了時に記述
