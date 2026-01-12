@@ -1380,6 +1380,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     //statusには１(予約なし)か８(予約あり)が入る
     //予約は廃止
         roomSession.leave()
+        if self.busyIndicator.isDescendant(of: self.view) {
             //すでに追加(addsubview)済み
             //画面サイズに合わせる
             self.busyIndicator.frame = self.view.frame
