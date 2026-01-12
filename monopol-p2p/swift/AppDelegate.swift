@@ -430,6 +430,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate ,PurchaseManagerDelegate {
         } else {
             let settings: UIUserNotificationSettings =
                 UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
+
+    private func setupSkyWayContext() {
+        Task {
+            do {
+                let token = await fetchSkyWayToken()
+                try await Context.setup(withToken: token, options: nil)
+            } catch {
+                print("SkyWay Context setup failed: \(error)")
+            }
+        }
+    }
+
+    private func fetchSkyWayToken() async -> String {
+        // TODO: Replace with your token fetching logic (e.g., call your backend)
+        return "<#SkyWay Token#>"
+    }
             application.registerUserNotificationSettings(settings)
         }
         application.registerForRemoteNotifications()
@@ -775,21 +791,6 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         
         // Change this to your preferred presentation option
 
-    private func setupSkyWayContext() {
-        Task {
-            do {
-                let token = await fetchSkyWayToken()
-                try await Context.setup(token: token)
-            } catch {
-                print("SkyWay Context setup failed: \(error)")
-            }
-        }
-    }
-
-    private func fetchSkyWayToken() async -> String {
-        // TODO: Replace with your token fetching logic (e.g., call your backend)
-        return "<#SkyWay Token#>"
-    }
         completionHandler([])
     }
     
