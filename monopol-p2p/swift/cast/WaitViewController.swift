@@ -1198,17 +1198,20 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         if(self.appDelegate.live_target_user_id > 0){
             //ライブ配信中
             //写真ダイアログを表示
-            let castPhotoDialog:CastPhotoDialog = UINib(nibName: "CastPhotoDialog", bundle: nil).instantiate(withOwner: self,options: nil)[0] as! CastPhotoDialog
-            //画面サイズに合わせる
-            castPhotoDialog.frame = self.view.frame
-            
-            // 貼り付ける
-            self.view.addSubview(castPhotoDialog)
-        }else{
-            //待機状態の時は「送信」でなく「保存」
-            //写真ダイアログを表示
-            let castPhotoDialog:CastScreenshotDialog = UINib(nibName: "CastScreenshotDialog", bundle: nil).instantiate(withOwner: self,options: nil)[0] as! CastScreenshotDialog
-            //画面サイズに合わせる
+        self.request_handler = self.castWaitConditionRef.observe(.value) { [weak self] (snap: DataSnapshot) in
+            guard let self = self else { return }
+                guard let dict = snapshot.value as? [String: Any] else {
+                    continue
+                }
+                    if roomSession.room == nil {
+                        //接続されていない場合(バックグラウンドにある場合)
+                        //ここでは何もしない＞処理は、WaitViewController+CommonSkywayの待機完了後に行う。
+                    } else {
+                        //フォアグラウンドにある場合
+                        self.castWaitDialog.requestDialogDo()
+        if self.request_handler != 0 {
+            self.castWaitConditionRef.removeObserver(withHandle: self.request_handler)
+        }
             castPhotoDialog.frame = self.view.frame
             
             // 貼り付ける
