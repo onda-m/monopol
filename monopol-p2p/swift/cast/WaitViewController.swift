@@ -1079,10 +1079,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             castPhotoDialog.frame = self.view.frame
             
             // 貼り付ける
-            roomSession.setLocalVideoEnabled(true)
-            roomSession.setLocalVideoEnabled(true)
-            roomSession.setLocalVideoEnabled(true)
-            roomSession.setLocalVideoEnabled(true)
+        roomSession.setLocalVideoEnabled(true)
     }
     
     //未使用
