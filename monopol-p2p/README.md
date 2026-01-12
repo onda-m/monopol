@@ -24,19 +24,6 @@ Podfile に SkyWay の公式 Specs レポジトリを追加済みです。`monop
 $ pod install
 ```
 
-### 2. APIKEY, DOMAINの書き換え
+### 2. SkyWay Context の初期化
 
-`swift/SkywayManager.swift` 内の `apiKey` と `domain` を、新SkyWay コンソールで発行した値に差し替えてください。テンプレートのままでは接続前にエラー通知が返るため、確実に設定漏れを検知できます。
-
-## SkyWay Room SDK を使った接続フロー
-
-`SkywayManager` で SkyWay の Room 接続を扱うように整理しました。最低限の利用手順は以下の通りです。
-
-1. 画面のライフサイクルに合わせて `SkywayManager.shared.startSession(delegate:)` で `SKWPeer` を初期化する（未初期化のまま `prepareLocalStream` を呼ぶとエラー通知が返ります）。
-2. `prepareLocalStream(in:)` でローカル映像ストリームを生成し、`SKWVideo` に割り当てる。
-3. `joinRoom(named:)` でメッシュ/ SFU ルームへ参加し、`SkywaySessionDelegate` でリモートストリームの増減を受け取る。
-4. 退室や画面終了時は `leaveRoom()` や `endSession()` を呼び、ストリームと Peer を確実に破棄する。
-
-コールバックはメインスレッドへ配送されるため、UI の更新を直接行えます。Room の publish/subscribe の状態変化は `SkywaySessionDelegate` で受け取り、必要に応じて `joinRoom` 呼び出し時の `optionBuilder` で SkyWay の `SKWRoomOption` をカスタマイズしてください。
-
-Peer ID を持たないストリームも破棄漏れなくクリーンアップされるようになっています。
+`swift/AppDelegate.swift` に SkyWay Room SDK の `Context.setup` 呼び出しとトークン取得のプレースホルダが追加されています。実運用ではバックエンドから発行したトークンを返すように `fetchSkyWayToken()` を置き換えてください。

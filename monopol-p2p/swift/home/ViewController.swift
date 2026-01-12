@@ -31,8 +31,6 @@ class ViewController: UIViewController,UIScrollViewDelegate,UICollectionViewData
     
     var idCount:Int=0
     
-    //fileprivate var peer: SKWPeer?
-    //fileprivate var mediaConnection: SKWMediaConnection?
     //var hymPeer: HYMPeer!
     //var hymMedeiaConnection: HYMMediaConnection!
 

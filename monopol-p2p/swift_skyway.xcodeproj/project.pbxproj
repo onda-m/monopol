@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		07B67C5000B9F2D5A17F24A4 /* Pods_swift_skyway.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CB898CFBA44DE3FAAD15BC5 /* Pods_swift_skyway.framework */; };
-		8E6A719E536748C8B2397C2D /* SkyWaySupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BBBCCD25BE34F92AF02F760 /* SkyWaySupport.swift */; };
 		6F0196DD1FB932C0003D22D2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0196DC1FB932C0003D22D2 /* AppDelegate.swift */; };
 		6F0196DF1FB932C0003D22D2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0196DE1FB932C0003D22D2 /* ViewController.swift */; };
 		6F0196E21FB932C0003D22D2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6F0196E01FB932C0003D22D2 /* Main.storyboard */; };
@@ -98,6 +97,8 @@
 		A341754920C331DF00D4B17F /* WaitTopDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A341754820C331DF00D4B17F /* WaitTopDialog.swift */; };
 		A341754B20C331F300D4B17F /* WaitTopDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = A341754A20C331F300D4B17F /* WaitTopDialog.xib */; };
 		A34AF6AE21B6F968009EFD41 /* UtilFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = A34AF6AD21B6F968009EFD41 /* UtilFunc.swift */; };
+		B0A1B2C3D4E5F6A7B8C9D0E1 /* SkyWayRoomSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F6A7B8C9D0E2 /* SkyWayRoomSession.swift */; };
+		B0A1B2C3D4E5F6A7B8C9D0E3 /* SkyWayVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F6A7B8C9D0E4 /* SkyWayVideoView.swift */; };
 		A34FEC0820AD6F640073A5C3 /* CastWaitDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = A34FEC0720AD6F640073A5C3 /* CastWaitDialog.xib */; };
 		A34FEC0A20AD6F880073A5C3 /* CastWaitDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A34FEC0920AD6F880073A5C3 /* CastWaitDialog.swift */; };
 		A34FEC0C20AD7EB30073A5C3 /* CastPhotoDialog.xib in Resources */ = {isa = PBXBuildFile; fileRef = A34FEC0B20AD7EB30073A5C3 /* CastPhotoDialog.xib */; };
@@ -296,7 +297,6 @@
 		A30C471A22757C97008BB1DF /* UtilStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilStruct.swift; sourceTree = "<group>"; };
 		A30F4BED22C6402800F52253 /* MaintenanceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaintenanceViewController.swift; sourceTree = "<group>"; };
 		A30FE25C20E2B95F00BC2B86 /* Setting.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Setting.storyboard; sourceTree = "<group>"; };
-		9BBBCCD25BE34F92AF02F760 /* SkyWaySupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyWaySupport.swift; sourceTree = "<group>"; };
 		A30FE25F20E2BA6900BC2B86 /* ProfileSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSettingViewController.swift; sourceTree = "<group>"; };
 		A30FE26120E404D300BC2B86 /* PairRankingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairRankingViewController.swift; sourceTree = "<group>"; };
 		A314DEBA20C4238A00FDEA42 /* MypageMenuViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MypageMenuViewCell.xib; sourceTree = "<group>"; };
@@ -363,6 +363,8 @@
 		A341754A20C331F300D4B17F /* WaitTopDialog.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WaitTopDialog.xib; sourceTree = "<group>"; };
 		A347A70320A5C4400098034D /* swift_skyway.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = swift_skyway.entitlements; sourceTree = "<group>"; };
 		A34AF6AD21B6F968009EFD41 /* UtilFunc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilFunc.swift; sourceTree = "<group>"; };
+		B0A1B2C3D4E5F6A7B8C9D0E2 /* SkyWayRoomSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyWayRoomSession.swift; sourceTree = "<group>"; };
+		B0A1B2C3D4E5F6A7B8C9D0E4 /* SkyWayVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyWayVideoView.swift; sourceTree = "<group>"; };
 		A34FEC0720AD6F640073A5C3 /* CastWaitDialog.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CastWaitDialog.xib; sourceTree = "<group>"; };
 		A34FEC0920AD6F880073A5C3 /* CastWaitDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CastWaitDialog.swift; sourceTree = "<group>"; };
 		A34FEC0B20AD7EB30073A5C3 /* CastPhotoDialog.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CastPhotoDialog.xib; sourceTree = "<group>"; };
@@ -674,6 +676,8 @@
 				A33D48C9209B2DDC00CC78B9 /* AsyncImageView.swift */,
 				6FF284A01FB942A900FC26BF /* Util.swift */,
 				A34AF6AD21B6F968009EFD41 /* UtilFunc.swift */,
+				B0A1B2C3D4E5F6A7B8C9D0E2 /* SkyWayRoomSession.swift */,
+				B0A1B2C3D4E5F6A7B8C9D0E4 /* SkyWayVideoView.swift */,
 				A3AAC4B221885E0C00DD9835 /* UtilToViewController.swift */,
 				A3AAC4B021885D3900DD9835 /* UtilExtension.swift */,
 				A3DCE704217D281D00694155 /* UtilLog.swift */,
@@ -689,7 +693,6 @@
 				A3DCE702217BB96900694155 /* PhotoLibraryManager.swift */,
 				A389F49E229925F500EF28FA /* CheckBox.swift */,
 				A3640D8922EE7D43008DB630 /* FaceTracker.swift */,
-				9BBBCCD25BE34F92AF02F760 /* SkyWaySupport.swift */,
 				BF5E3B6A2542408600B1C80A /* TriangleButton.swift */,
 			);
 			path = common;
@@ -1150,12 +1153,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8E6A719E536748C8B2397C2D /* SkyWaySupport.swift in Sources */,
 				BF5E3B6B2542408800B1C80A /* TriangleButton.swift in Sources */,
 				A3DE2BB620B77FB400C3315F /* BusyIndicator.swift in Sources */,
 				A3A5E1022099059500F3CC71 /* Maintoolbarview.swift in Sources */,
 				A341754920C331DF00D4B17F /* WaitTopDialog.swift in Sources */,
 				A34AF6AE21B6F968009EFD41 /* UtilFunc.swift in Sources */,
+				B0A1B2C3D4E5F6A7B8C9D0E1 /* SkyWayRoomSession.swift in Sources */,
+				B0A1B2C3D4E5F6A7B8C9D0E3 /* SkyWayVideoView.swift in Sources */,
 				A3640D8A22EE7D43008DB630 /* FaceTracker.swift in Sources */,
 				BF5B04982840CD2500294C5B /* AppleLoginStartViewController.swift in Sources */,
 				A3DE373E211AEAE60096D17E /* UserGetScreenshotDialog.swift in Sources */,
