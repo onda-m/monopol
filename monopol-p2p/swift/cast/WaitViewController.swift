@@ -1216,15 +1216,15 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         }
     }
 
-    //フォアグラウンドなどではなく、この画面に遷移したときにだけ実行される。（1度のみ実行）
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
-        // 子ノード condition への参照
-        self.castWaitConditionRef = self.rootRef.child(Util.INIT_FIREBASE + "/"
-            + String(self.user_id))
-        // クラウド上で、ノード Util.INIT_FIREBASE に変更があった場合のコールバック処理
-        self.request_handler = self.castWaitConditionRef.observe(.value) { (snap: DataSnapshot) in
+                guard let dict = snapshot.value as? [String: Any] else {
+                    continue
+                }
+                    if roomSession.room == nil {
+                        //接続されていない場合(バックグラウンドにある場合)
+                        //ここでは何もしない＞処理は、WaitViewController+CommonSkywayの待機完了後に行う。
+                    } else {
+                        //フォアグラウンドにある場合
+                        self.castWaitDialog.requestDialogDo()
             //self.conditionRef.removeObserver(withHandle: handler)
 
             if(snap.exists() == false){
