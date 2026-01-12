@@ -551,12 +551,12 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         self.castWaitDialog.topInfoLabel.isHidden = true
         
         //くるくる表示開始
-        if(self.busyIndicator.isDescendant(of: self.view)){
+        if self.busyIndicator.isDescendant(of: self.view) {
             //すでに追加(addsubview)済み
             //画面サイズに合わせる
             self.busyIndicator.frame = self.view.frame
             self.view.bringSubviewToFront(self.busyIndicator)
-        }else{
+        } else {
             //画面サイズに合わせる
             self.busyIndicator.frame = self.view.frame
             // 貼り付ける
@@ -1359,12 +1359,9 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         
         //UIAlertControllerにキャンセルのアクションを追加する
         let cancelAction = UIAlertAction(title: "配信を続ける", style: UIAlertAction.Style.cancel, handler: {
-            (action: UIAlertAction!) in
-            //print("キャンセルのシートが押されました。")
-        })
-        actionAlert.addAction(cancelAction)
-        
-        // iPadでは必須！
+        if self.busyIndicator.isDescendant(of: self.view) {
+        } else {
+        roomSession.leave()
         actionAlert.popoverPresentationController?.sourceView = self.view
         
         // ここで表示位置を調整。xは画面中央、yは画面下部になる様に指定
@@ -1471,6 +1468,9 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         // アプリ起動時・フォアグラウンド復帰時の通知を設定する
         //iOS9からremoveは必要ない？
         self.center.addObserver(
+}//メインのクラスはここまで
+
+extension WaitViewController {
             self,
             selector: #selector(self.onDidBecomeActive(_:)),
             name: UIApplication.didBecomeActiveNotification,
@@ -1677,7 +1677,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
                         self.strConnectLevel = obj.connect_level//絆レベル
                         
                         break
-                    }
+}
                     
                     //print(json.result)
                     dispatchGroup.leave()//サブタスク終了時に記述
