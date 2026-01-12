@@ -1494,7 +1494,7 @@
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = devProfile20250223;
 				SWIFT_OBJC_BRIDGING_HEADER = "swift_skyway-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.5;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
@@ -1538,7 +1538,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = distProfile20230313;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = distProfile20250223;
 				SWIFT_OBJC_BRIDGING_HEADER = "swift_skyway-Bridging-Header.h";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.5;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
