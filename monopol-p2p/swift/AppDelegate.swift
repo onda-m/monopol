@@ -434,17 +434,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate ,PurchaseManagerDelegate {
     private func setupSkyWayContext() {
         Task {
             do {
-                let token = await fetchSkyWayToken()
-                try await Context.setup(withToken: token, options: nil)
+                try await Context.setupForDev(withAppId: "YOUR_APP_ID", secretKey: "YOUR_SECRET_KEY")
             } catch {
                 print("SkyWay Context setup failed: \(error)")
             }
         }
-    }
-
-    private func fetchSkyWayToken() async -> String {
-        // TODO: Replace with your token fetching logic (e.g., call your backend)
-        return "<#SkyWay Token#>"
     }
             application.registerUserNotificationSettings(settings)
         }
