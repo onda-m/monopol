@@ -6,7 +6,6 @@
 //  Copyright © 2018年 worldtrip. All rights reserved.
 //
 
-import SkyWayRoom
 import Foundation
 import UIKit
 //import Firebase
@@ -769,45 +768,6 @@ class UtilFunc {
         }
     }
 
-    //peerIdの接続リストの取得
-    static func loadConnectedPeerIds(peer:SKWPeer, handler:@escaping (_ peerIds:[String]?)->Void){
-        peer.listAllPeers({ (peers) -> Void in
-            if let connectedPeerIds = peers as? [String]{
-                let res = connectedPeerIds.filter({ (connectedPeerId) -> Bool in
-                    return connectedPeerId != "0"
-                })
-                handler(res)
-            }else{
-                handler(nil)
-            }
-        })
-    }
-    
-    //使用方法
-    // Util.isPeerIdExist(peer: SKWPeer, peerId: String) { (flg) in ...
-    //接続リストに自分のpeerIdが存在するかを判断
-    static func isPeerIdExist(peer: SKWPeer, peerId: String, handler:@escaping (_ flg:Bool?)->Void){
-        self.loadConnectedPeerIds(peer: peer) { (peerIds) in
-            if(peerId == "0"){
-                handler(false)
-            }else{
-                if let _peerIds = peerIds, _peerIds.count > 0{
-                    if _peerIds.firstIndex(of: peerId) != nil {
-                        //接続リストに自分のpeerIdがあった場合
-                        handler(true)
-                    }else{
-                        handler(false)
-                    }
-                }else{
-                    handler(false)
-                    //UIAlertController.oneButton("確認", message: "接続中の他のPeerIdはありません", handler: nil)
-                }
-            }
-        }
-        //UtilLog.printf(str:"flg = " + String(flg))
-        //return flg
-    }
-    
     /***********************************************************/
     //new予約システム関連
     //１連の配信が終わったら（または配信をスタートするタイミングで）、キャストIDに紐づくデータをdeleteする

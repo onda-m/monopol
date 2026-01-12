@@ -19,10 +19,7 @@ import LineSDK
 class AppDelegate: UIResponder, UIApplicationDelegate ,PurchaseManagerDelegate {
     //var navigationController: UINavigationController?
     
-    //ストリーマー側ライブ配信の接続用
-    //var peer: SKWPeer?
-    var localStream: SKWMediaStream?
-    //var peerFlg: Int = 0//待機状態になると一時的に1になる。1の場合はPEERオブジェクトは初期化される
+    // SkyWay Room SDK は Context.setup 済みであることが前提
     
     // notification center (singleton)
     //let center = UNUserNotificationCenter.current()
@@ -364,6 +361,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate ,PurchaseManagerDelegate {
     }
     
     //アプリがアクティブになる度に呼ばれる
+
+        setupSkyWayContext()
     func applicationDidBecomeActive(application: UIApplication) {
         
         application.endBackgroundTask(self.backgroundTaskID)
@@ -431,6 +430,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate ,PurchaseManagerDelegate {
         } else {
             let settings: UIUserNotificationSettings =
                 UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
+
+    private func setupSkyWayContext() {
+        Task {
+            do {
+                try await Context.setupForDev(withAppId: "YOUR_APP_ID", secretKey: "YOUR_SECRET_KEY")
+            } catch {
+                print("SkyWay Context setup failed: \(error)")
+            }
+        }
+    }
             application.registerUserNotificationSettings(settings)
         }
         application.registerForRemoteNotifications()
@@ -775,6 +784,7 @@ extension AppDelegate : UNUserNotificationCenterDelegate {
         //print(userInfo)
         
         // Change this to your preferred presentation option
+
         completionHandler([])
     }
     
