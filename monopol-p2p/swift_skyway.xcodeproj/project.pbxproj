@@ -268,6 +268,7 @@
 
 /* Begin PBXFileReference section */
 		4CB898CFBA44DE3FAAD15BC5 /* Pods_swift_skyway.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_swift_skyway.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		12C6B02BDAC54985A578483E /* Release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Config/Release.xcconfig; sourceTree = "<group>"; };
 		6BF294BFC37D2D86AC140AA2 /* Pods-swift_skyway.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-swift_skyway.release.xcconfig"; path = "Target Support Files/Pods-swift_skyway/Pods-swift_skyway.release.xcconfig"; sourceTree = "<group>"; };
 		6F0196D91FB932C0003D22D2 /* swift_skyway.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = swift_skyway.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F0196DC1FB932C0003D22D2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -277,6 +278,7 @@
 		6F0196E81FB932C0003D22D2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6F0196FF1FB938E4003D22D2 /* MediaConnectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaConnectionViewController.swift; sourceTree = "<group>"; };
 		6FF284A01FB942A900FC26BF /* Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Util.swift; sourceTree = "<group>"; };
+		7856BBDC999445F7BFD605CF /* Debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Config/Debug.xcconfig; sourceTree = "<group>"; };
 		A302F41C242496B40065CBA2 /* FirstFollowView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FirstFollowView.xib; sourceTree = "<group>"; };
 		A302F41E242496D50065CBA2 /* FirstFollowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstFollowView.swift; sourceTree = "<group>"; };
 		A3065DB220D2349F00236638 /* MainReportViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainReportViewController.swift; sourceTree = "<group>"; };
@@ -358,6 +360,7 @@
 		A341754320C3186D00D4B17F /* Talk.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Talk.storyboard; sourceTree = "<group>"; };
 		A341754620C3196400D4B17F /* TalkTopViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkTopViewController.swift; sourceTree = "<group>"; };
 		A341754820C331DF00D4B17F /* WaitTopDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitTopDialog.swift; sourceTree = "<group>"; };
+		54504EEC14584B0283509303 /* Secrets.xcconfig.example */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Secrets.xcconfig.example"; sourceTree = "<group>"; };
 		A341754A20C331F300D4B17F /* WaitTopDialog.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WaitTopDialog.xib; sourceTree = "<group>"; };
 		A347A70320A5C4400098034D /* swift_skyway.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = swift_skyway.entitlements; sourceTree = "<group>"; };
 		A34AF6AD21B6F968009EFD41 /* UtilFunc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtilFunc.swift; sourceTree = "<group>"; };
@@ -527,11 +530,22 @@
 			children = (
 				A347A70320A5C4400098034D /* swift_skyway.entitlements */,
 				A38ACC7024F8CABA00F6424E /* swift_skyway-Bridging-Header.h */,
+				7596421C2BC04842AFAFE161 /* Config */,
+				54504EEC14584B0283509303 /* Secrets.xcconfig.example */,
 				6F0196DB1FB932C0003D22D2 /* swift */,
 				6F0196DA1FB932C0003D22D2 /* Products */,
 				A3161C2C20AEC1C800260B76 /* Frameworks */,
 				B683E475775C2C1AEC2B1E94 /* Pods */,
 			);
+			sourceTree = "<group>";
+		};
+		7596421C2BC04842AFAFE161 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				7856BBDC999445F7BFD605CF /* Debug.xcconfig */,
+				12C6B02BDAC54985A578483E /* Release.xcconfig */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 		6F0196DA1FB932C0003D22D2 /* Products */ = {
@@ -1448,7 +1462,7 @@
 		};
 		6F0196F71FB932C1003D22D2 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E8C83DA7BB5AD47D02EBF56D /* Pods-swift_skyway.debug.xcconfig */;
+			baseConfigurationReference = 7856BBDC999445F7BFD605CF /* Debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1493,7 +1507,7 @@
 		};
 		6F0196F81FB932C1003D22D2 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6BF294BFC37D2D86AC140AA2 /* Pods-swift_skyway.release.xcconfig */;
+			baseConfigurationReference = 12C6B02BDAC54985A578483E /* Release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;

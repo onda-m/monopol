@@ -7,6 +7,41 @@
 import Foundation
 import UIKit
 
+protocol SkywayTokenProvider {
+    func fetchToken() async throws -> String
+}
+
+enum SkywayTokenProviderError: Error {
+    case missingToken
+}
+
+struct SkywayConfig {
+    static func plistValue(_ key: String) -> String? {
+        Bundle.main.object(forInfoDictionaryKey: key) as? String
+    }
+
+    static var apiKey: String? {
+        plistValue("SKYWAY_API_KEY")
+    }
+
+    static var domain: String? {
+        plistValue("SKYWAY_DOMAIN")
+    }
+
+    static var authToken: String? {
+        plistValue("SKYWAY_AUTH_TOKEN")
+    }
+}
+
+struct DebugSkywayTokenProvider: SkywayTokenProvider {
+    func fetchToken() async throws -> String {
+        guard let token = SkywayConfig.authToken, token.isEmpty == false else {
+            throw SkywayTokenProviderError.missingToken
+        }
+        return token
+    }
+}
+
 //TIPS
 //配信関連
 //userrequest/cast_id/user_id
@@ -63,6 +98,19 @@ class Util {
     /***********************************************************/
     //規約同意チェックフラグ：１＝チェック済
     //let rule_check_flg = UserDefaults.standard.integer(forKey: "rule_check_flg")
+
+    static var skywayTokenProvider: SkywayTokenProvider?
+
+    static func resolveSkywayAuthToken() async throws -> String {
+        if let provider = skywayTokenProvider {
+            return try await provider.fetchToken()
+        }
+        #if DEBUG
+        return try await DebugSkywayTokenProvider().fetchToken()
+        #else
+        throw SkywayTokenProviderError.missingToken
+        #endif
+    }
     
     /***********************************************************/
     //URL共通部分(本番用)
@@ -77,8 +125,8 @@ class Util {
     static let URL_USER_PHOTO_BASE = "https://jbh36p8c.user.webaccel.jp/"//画像URLの共通部分(ストリーミング)
     static let URL_USER_MOVIE_BASE = "https://jbh36p8c.user.webaccel.jp/cast_movies/"//動画URLの共通部分(ストリーミング)
     // https://webrtc.ecl.ntt.com/からAPIKeyとDomainを取得してください
-    static let skywayAPIKey: String = "892b648f-98c5-4b9a-b02f-79133280483d"
-    static let skywayDomain: String = "localhost"
+    static let skywayAPIKey: String = "<set via Secrets.xcconfig>"
+    static let skywayDomain: String = "<set via Secrets.xcconfig>"
     //firebaseのサーバーキー
     //サーバーキーは Firebase コンソールから、
     //「プロジェクトの設定」（歯車のアイコンをクリック）-> 「クラウドメッセージング」から確認できます。
@@ -128,8 +176,8 @@ class Util {
     static let URL_USER_PHOTO_BASE = "https://ancuvcdg.user.webaccel.jp/"//画像URLの共通部分(ストリーミング)
     static let URL_USER_MOVIE_BASE = "https://ancuvcdg.user.webaccel.jp/cast_movies/"//動画URLの共通部分(ストリーミング)
     // https://webrtc.ecl.ntt.com/からAPIKeyとDomainを取得してください
-    static let skywayAPIKey: String = "d53e1b48-2ef6-4649-93e4-3a69c66b6e28"
-    static let skywayDomain: String = "localhost"
+    static var skywayAPIKey: String { SkywayConfig.apiKey ?? "" }
+    static var skywayDomain: String { SkywayConfig.domain ?? "" }
     //firebaseのサーバーキー
     //サーバーキーは Firebase コンソールから、
     //「プロジェクトの設定」（歯車のアイコンをクリック）-> 「クラウドメッセージング」から確認できます。
