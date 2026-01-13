@@ -25,13 +25,20 @@ jobs:
       - name: Pod install
         run: |
           ls -la
-          pod repo update
-          pod install --verbose
+          pod install --repo-update --verbose
+
+      - name: Verify Podfile.lock exists
+        run: |
+          ls -la
+          test -f Podfile.lock
 
       - name: Commit Podfile.lock (if changed)
         run: |
           git status
-          if git diff --quiet -- Podfile.lock; then
+          # 変更がなくても「新規追加」を検出したいので diff ではなく status で判定
+          if git status --porcelain | grep -q "Podfile.lock"; then
+            echo "Podfile.lock changed or added"
+          else
             echo "Podfile.lock unchanged"
             exit 0
           fi
