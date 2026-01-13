@@ -6,6 +6,7 @@
 
 import UIKit
 import SkyWay
+import SkyWayRoom
 import ReverseExtension
 import Firebase
 import FirebaseDatabase
@@ -191,7 +192,18 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
     /*************************************/
     //skyway関連
     /*************************************/
-    var dataConnection: SKWDataConnection?
+    private var room: Room?
+    private var localMember: LocalRoomMember?
+    private var roomPublications: [RoomPublication] = []
+    private var roomSubscriptions: [RoomSubscription] = []
+    private var localVideoStream: LocalVideoStream?
+    private var localAudioStream: LocalAudioStream?
+    private var localDataStream: LocalDataStream?
+    private var remoteVideoStream: RemoteVideoStream?
+    private var remoteAudioStream: RemoteAudioStream?
+    private var remoteDataStream: RemoteDataStream?
+    private var localVideoView: SkyWayVideoView?
+    private var remoteVideoView: SkyWayVideoView?
 
     var messages = [Message]()
     struct Message{
@@ -203,9 +215,11 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
         var text:String?
     }
     
+    private var roomTask: Task<Void, Never>?
+    private var roomClosed = false
     var peer: SKWPeer?
     var mediaConnection: SKWMediaConnection?
-    //var localStream: SKWMediaStream?
+    var dataConnection: SKWDataConnection?
     var remoteStream: SKWMediaStream?
     
     //チャットやりとりのリストの部分
@@ -1352,10 +1366,12 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
         self.appDelegate.request_password = "0"
         self.appDelegate.request_cast_id = 0//選択中（かつ申請中）のキャスト
         
-        self.remoteStream?.removeVideoRenderer(self.remoteStreamView, track: 0)
-        self.remoteStream = nil
-        self.mediaConnection = nil
-        self.dataConnection = nil
+        self.detachRemoteVideo()
+        self.remoteVideoStream = nil
+        self.remoteAudioStream = nil
+        self.remoteDataStream = nil
+        self.roomPublications.removeAll()
+        self.roomSubscriptions.removeAll()
         
         print("close 通話")
         
