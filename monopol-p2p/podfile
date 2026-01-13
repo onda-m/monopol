@@ -1,10 +1,28 @@
-# platform :ios,'13.0'
+# monopol-p2p/Podfile
+
+# SkyWayRoom を解決するために “SkyWayのSpecs repo” を先に指定
+source 'https://github.com/skyway/skyway-ios-sdk-specs.git'
+source 'https://cdn.cocoapods.org/'
+
+platform :ios, '14.0'
+
+# 既存プロジェクトが Swift/Framework 前提なら通常これでOK
 use_frameworks!
 
-def install_pods
-  pod 'SwiftyGif'
+# （任意）警告を減らすなら
+inhibit_all_warnings!
+
+target 'swift_skyway' do
+  # 旧SkyWay（段階移行中は残す）
   pod 'SkyWay'
+
+  # 新SkyWay Room SDK
   pod 'SkyWayRoom'
+
+  # 既存で使っているPodがあればこの下に並べる
+  # 例:
+  # pod 'SwiftyGif', '~> 5.4'
+  pod 'SwiftyGif'
   pod 'ReachabilitySwift'
   pod 'PINRemoteImage'
   pod 'XLPagerTabStrip', '~> 8.1'
@@ -21,15 +39,10 @@ def install_pods
 end
 
 post_install do |installer|
-  # Pods 側の全ターゲットに反映
   installer.pods_project.targets.each do |t|
-    t.build_configurations.each do |c|
-      c.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
-      c.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64' # 使っているなら継続
+    t.build_configurations.each do |config|
+      # Apple Silicon / CIでも安定しやすい設定（必要に応じて）
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
     end
   end
-end
-
-target 'swift_skyway' do
-  install_pods
 end
