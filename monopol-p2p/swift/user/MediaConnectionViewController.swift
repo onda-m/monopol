@@ -202,8 +202,10 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
     private var remoteVideoStream: RemoteVideoStream?
     private var remoteAudioStream: RemoteAudioStream?
     private var remoteDataStream: RemoteDataStream?
-    private var localVideoView: VideoView?
-    private var remoteVideoView: VideoView?
+    //private var localVideoView: VideoView?
+    //private var remoteVideoView: VideoView?
+    private var localVideoView: SkyWayVideoView?
+    private var remoteVideoView: SkyWayVideoView?
 
     var messages = [Message]()
     struct Message{
