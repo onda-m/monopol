@@ -4,6 +4,7 @@ use_frameworks!
 def install_pods
   pod 'SwiftyGif'
   pod 'SkyWay'
+  pod 'SkyWayRoom'
   pod 'ReachabilitySwift'
   pod 'PINRemoteImage'
   pod 'XLPagerTabStrip', '~> 8.1'
@@ -32,4 +33,3 @@ end
 target 'swift_skyway' do
   install_pods
 end
-
