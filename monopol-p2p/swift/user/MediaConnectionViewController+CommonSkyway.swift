@@ -51,8 +51,7 @@ extension MediaConnectionViewController{
 
     private func attachLocalVideo() {
         if localVideoView == nil {
-            //localVideoView = VideoView(frame: localStreamView.bounds)
-            localVideoView = SkyWayVideoView(frame: localStreamView.bounds)
+            localVideoView = VideoView(frame: localStreamView.bounds)
             if let localVideoView = localVideoView {
                 localVideoView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
                 localStreamView.addSubview(localVideoView)
@@ -65,8 +64,7 @@ extension MediaConnectionViewController{
 
     private func attachRemoteVideo() {
         if remoteVideoView == nil {
-            //remoteVideoView = VideoView(frame: remoteStreamView.bounds)
-            remoteVideoView = SkyWayVideoView(frame: remoteStreamView.bounds)
+            remoteVideoView = VideoView(frame: remoteStreamView.bounds)
             if let remoteVideoView = remoteVideoView {
                 remoteVideoView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
                 remoteStreamView.addSubview(remoteVideoView)
