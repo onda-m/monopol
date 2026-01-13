@@ -97,7 +97,7 @@ extension MediaConnectionViewController{
             let room = try await Room.findOrCreate(with: roomConfig)
             self.room = room
 
-            let memberConfig = MemberConfig(name: memberName)
+            let memberConfig = RoomMemberConfig(name: memberName)
             let localMember = try await room.join(with: memberConfig)
             self.localMember = localMember
 
