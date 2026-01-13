@@ -1,14 +1,27 @@
-# platform :ios,'13.0'
-use_frameworks!
+# monopol-p2p/Podfile
 
-def install_pods
-  pod 'SwiftyGif'
+source 'https://github.com/skyway/skyway-ios-sdk-specs.git'
+source 'https://github.com/skyway/skyway-ios-webrtc-specs.git'
+source 'https://cdn.cocoapods.org/'
+
+platform :ios, '14.0'
+use_frameworks!
+inhibit_all_warnings!
+
+target 'swift_skyway' do
+  # 旧SkyWay（段階移行中）
   pod 'SkyWay'
+
+  # 新SkyWay Room SDK
+  pod 'SkyWayRoom'
+
+  # 既存Pods
+  pod 'SwiftyGif'
   pod 'ReachabilitySwift'
   pod 'PINRemoteImage'
   pod 'XLPagerTabStrip', '~> 8.1'
-  pod 'Firebase'                      # メタPod（Analytics等を含む）
-  pod 'FirebaseAnalytics'             # Coreの代替
+  pod 'Firebase'
+  pod 'FirebaseAnalytics'
   pod 'FirebaseAuth'
   pod 'FirebaseDatabase'
   pod 'FirebaseStorage'
@@ -20,16 +33,13 @@ def install_pods
 end
 
 post_install do |installer|
-  # Pods 側の全ターゲットに反映
   installer.pods_project.targets.each do |t|
-    t.build_configurations.each do |c|
-      c.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
-      c.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64' # 使っているなら継続
+    t.build_configurations.each do |config|
+      # これが最重要：Pods全体の最低iOSを14.0に統一
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+
+      # Apple Silicon（Simulator arm64）対策
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
     end
   end
 end
-
-target 'swift_skyway' do
-  install_pods
-end
-
