@@ -95,18 +95,18 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     //skyway関連
     /*************************************/
     var dataConnection: SKWDataConnection?
-    private var room: Room?
-    private var localMember: LocalRoomMember?
-    private var roomPublications: [RoomPublication] = []
-    private var roomSubscriptions: [RoomSubscription] = []
-    private var localVideoStream: LocalVideoStream?
-    private var localAudioStream: LocalAudioStream?
-    private var localDataStream: LocalDataStream?
-    private var remoteVideoStream: RemoteVideoStream?
-    private var remoteAudioStream: RemoteAudioStream?
-    private var remoteDataStream: RemoteDataStream?
-    private var localVideoView: VideoView?
-    private var remoteVideoView: VideoView?
+    var room: Room?
+    var localMember: LocalRoomMember?
+    var roomPublications: [RoomPublication] = []
+    var roomSubscriptions: [RoomSubscription] = []
+    var localVideoStream: LocalVideoStream?
+    var localAudioStream: LocalAudioStream?
+    var localDataStream: LocalDataStream?
+    var remoteVideoStream: RemoteVideoStream?
+    var remoteAudioStream: RemoteAudioStream?
+    var remoteDataStream: RemoteDataStream?
+    var localVideoView: VideoView?
+    var remoteVideoView: VideoView?
     var roomTask: Task<Void, Never>?
     var roomClosed = false
     var messages = [Message]()
