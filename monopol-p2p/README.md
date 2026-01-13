@@ -22,12 +22,27 @@ Cocoapods 1.0.0以上
 $ pod install
 ```
 
-### 2. APIKEY, DOMAINの書き換え
+### 2. 開発用 Secrets.xcconfig の準備（DEBUG限定）
 
 ```
-// AppDelegate.swift
-// https://webrtc.ecl.ntt.com/からAPIKeyとDomainを取得してください
-var skywayAPIKey:String? = "xxx"
-var skywayDomain:String? = "xxx"
+cp Secrets.xcconfig.example Secrets.xcconfig
+```
 
+`Secrets.xcconfig` に以下を設定してください（DEBUGビルドのみで読み込まれます）。
+
+```
+SKYWAY_API_KEY=
+SKYWAY_DOMAIN=
+SKYWAY_AUTH_TOKEN=
+```
+
+### 3. トークン注入（TokenProvider）
+
+- 本番では外部から Token を注入する設計です。
+- DEBUG ビルドでは `Secrets.xcconfig` の `SKYWAY_AUTH_TOKEN` を利用します。
+
+例: アプリ起動時に外部 TokenProvider を注入する場合
+
+```swift
+Util.skywayTokenProvider = YourTokenProvider()
 ```
