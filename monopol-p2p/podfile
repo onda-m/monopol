@@ -1,15 +1,12 @@
 # monopol-p2p/Podfile
 
-# SkyWayRoom を解決するために “SkyWayのSpecs repo” を先に指定
+# SkyWayRoomをCocoaPodsで入れる場合は、SkyWayのSDK specとWebRTC specの両方が必要
 source 'https://github.com/skyway/skyway-ios-sdk-specs.git'
+source 'https://github.com/skyway/skyway-ios-webrtc-specs.git'
 source 'https://cdn.cocoapods.org/'
 
 platform :ios, '14.0'
-
-# 既存プロジェクトが Swift/Framework 前提なら通常これでOK
 use_frameworks!
-
-# （任意）警告を減らすなら
 inhibit_all_warnings!
 
 target 'swift_skyway' do
@@ -19,15 +16,13 @@ target 'swift_skyway' do
   # 新SkyWay Room SDK
   pod 'SkyWayRoom'
 
-  # 既存で使っているPodがあればこの下に並べる
-  # 例:
-  # pod 'SwiftyGif', '~> 5.4'
+  # 既存Pods
   pod 'SwiftyGif'
   pod 'ReachabilitySwift'
   pod 'PINRemoteImage'
   pod 'XLPagerTabStrip', '~> 8.1'
-  pod 'Firebase'                      # メタPod（Analytics等を含む）
-  pod 'FirebaseAnalytics'             # Coreの代替
+  pod 'Firebase'
+  pod 'FirebaseAnalytics'
   pod 'FirebaseAuth'
   pod 'FirebaseDatabase'
   pod 'FirebaseStorage'
