@@ -1,0 +1,38 @@
+name: Generate Podfile.lock
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pod_install:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # CocoaPods が古い/入ってない場合に備えてセットアップ（任意だけど安定）
+      - name: Setup CocoaPods
+        uses: maxim-lobanov/setup-cocoapods@v1
+        with:
+          version: "1.15.2"
+
+      - name: Pod install
+        run: |
+          pod repo update
+          pod install --verbose
+
+      - name: Commit Podfile.lock (if changed)
+        run: |
+          git status
+          if git diff --quiet -- Podfile.lock; then
+            echo "Podfile.lock unchanged"
+            exit 0
+          fi
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Podfile.lock
+          git commit -m "Update Podfile.lock via GitHub Actions"
+          git push
