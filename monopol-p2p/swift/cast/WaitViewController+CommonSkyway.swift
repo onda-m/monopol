@@ -7,6 +7,7 @@
 //
 
 import SkyWay
+import SkyWayRoom
 import AVFoundation
 
 // MARK: setup skyway
@@ -116,28 +117,31 @@ extension WaitViewController{
     }
     
     func closeMedia() {
-
-        if self.mediaConnection != nil{
-            self.mediaConnection!.close()
-            self.mediaConnection!.on(.MEDIACONNECTION_EVENT_STREAM, callback: nil)
-            self.mediaConnection!.on(.MEDIACONNECTION_EVENT_CLOSE, callback: nil)
-            self.mediaConnection!.on(.MEDIACONNECTION_EVENT_ERROR, callback: nil)
-            self.mediaConnection = nil
+        roomClosed = true
+        roomTask?.cancel()
+        roomTask = nil
+        roomSubscriptions.forEach { subscription in
+            subscription.cancel()
         }
-        
-        //ローカルストリームを一時停止
-        //self.appDelegate.localStream?.setEnableVideoTrack(0, enable: false)
+        roomSubscriptions.removeAll()
+        roomPublications.forEach { publication in
+            publication.cancel()
+        }
+        roomPublications.removeAll()
+        localDataStream = nil
+        localAudioStream = nil
+        localVideoStream = nil
+        remoteVideoStream = nil
+        remoteAudioStream = nil
+        remoteDataStream = nil
+        detachLocalVideo()
+        detachRemoteVideo()
     }
     
     func sessionClose() {
-        self.peer!.on(.PEER_EVENT_OPEN, callback: nil)
-        self.peer!.on(.PEER_EVENT_CLOSE, callback: nil)
-        self.peer!.on(.PEER_EVENT_CALL, callback: nil)
-        self.peer!.on(.PEER_EVENT_DISCONNECTED, callback: nil)
-        self.peer!.on(.PEER_EVENT_ERROR, callback: nil)
-
-        self.peer!.destroy()
-        self.peer = nil
+        Task { @MainActor in
+            await leaveRoomIfNeeded()
+        }
     }
     
     //type=0:初期化あり(最初一度だけ実行)
@@ -166,49 +170,10 @@ extension WaitViewController{
             self.view.bringSubviewToFront(self.busyIndicator)
         }
         
-        if(self.peer == nil || self.peer!.isDestroyed == true || self.peer!.isDisconnected == true){
-            let option: SKWPeerOption = SKWPeerOption.init();
-            option.key = Util.skywayAPIKey
-            option.domain = Util.skywayDomain
-
-            //idにはuser_idを入れる
-            self.peer = SKWPeer(id: String(self.user_id), options: option)
-            if let _peer = self.peer{
-                self.setupPeerCallBacks(peer: _peer)
-                self.setupStream(peer: _peer)
-            }else{
-                print("failed to create peer setup")
-            }
-        }else{
-            UtilFunc.isPeerIdExist(peer: self.peer!, peerId: String(self.user_id)){ (flg) in
-                if(flg == false){
-                    //接続されていない場合(バックグラウンドにある場合)
-                    //self.appDelegate.peer!.disconnect()
-                    //self.appDelegate.peer!.destroy()
-                    //self.appDelegate.peer = nil
-
-                    //正常状態(人的操作によるもの)にする
-                    self.listenerErrorFlg = 1
-                    self.appDelegate.localStream!.removeVideoRenderer(self.localStreamView, track: 0)
-                    
-                    let option: SKWPeerOption = SKWPeerOption.init();
-                    option.key = Util.skywayAPIKey
-                    option.domain = Util.skywayDomain
-                    
-                    //idにはuser_idを入れる
-                    self.peer = SKWPeer(id: String(self.user_id), options: option)
-                    
-                    if let _peer = self.peer{
-                        self.setupPeerCallBacks(peer: _peer)
-                        self.setupStream(peer: _peer)
-                    }else{
-                        print("failed to create peer setup")
-                    }
-                    
-                }else{
-                    //PEERだけが繋がっている場合
-                }
-            }
+        roomClosed = false
+        roomTask?.cancel()
+        roomTask = Task { @MainActor in
+            await joinRoomIfNeeded(roomName: String(self.user_id), memberName: String(self.user_id))
         }
         
         self.busyIndicator.removeFromSuperview()
@@ -219,40 +184,153 @@ extension WaitViewController{
             UtilFunc.deleteCastLock(cast_id:self.user_id, user_id:self.user_id, type:1)
         }
     }
-    
-    func setupStream(peer:SKWPeer){
-        //下記はエミュレーターだとエラーとなる
-        SKWNavigator.initialize(peer)
-        let constraints:SKWMediaConstraints = SKWMediaConstraints()
-        self.appDelegate.localStream = SKWNavigator.getUserMedia(constraints)
 
-        self.appDelegate.localStream?.addVideoRenderer(self.localStreamView, track: 0)
-    }
-    
-    //通話の接続
-    func call(targetPeerId:String){
-        let option = SKWCallOption()
-        
-        if let mediaConnection = self.peer!.call(withId: targetPeerId, stream: self.appDelegate.localStream, options: option){
-            self.mediaConnection = mediaConnection
-            self.setupMediaConnectionCallbacks(mediaConnection: mediaConnection)
-        }else{
-            print("failed to call :\(targetPeerId)")
+    @MainActor
+    private func joinRoomIfNeeded(roomName: String, memberName: String) async {
+        guard roomClosed == false else { return }
+
+        do {
+            try await SkyWayContext.setup(withToken: Util.skywayRoomToken)
+            let roomConfig = RoomConfig(name: roomName, type: .p2p)
+            let room = try await Room.findOrCreate(with: roomConfig)
+            self.room = room
+
+            let memberConfig = MemberConfig(name: memberName)
+            let localMember = try await room.join(with: memberConfig)
+            self.localMember = localMember
+
+            if room.members.count > 2 {
+                await leaveRoomIfNeeded()
+                return
+            }
+
+            attachRoomCallbacks(room: room, localMember: localMember)
+            try await publishLocalStreams(localMember: localMember)
+        } catch {
+            print("SkyWayRoom join error: \(error)")
         }
     }
-    
-    //チャットの接続
-    func connect(targetPeerId:String){
-        let options = SKWConnectOption()
-        options.serialization = SKWSerializationEnum.SERIALIZATION_BINARY
-        
-        //接続
-        if let dataConnection = self.peer!.connect(withId: targetPeerId, options: options){
-            self.dataConnection = dataConnection
-            self.setupDataConnectionCallbacks(dataConnection: dataConnection)
-        }else{
-            print("failed to connect data connection")
+
+    @MainActor
+    private func attachRoomCallbacks(room: Room, localMember: LocalRoomMember) {
+        room.onMemberJoined { [weak self] _ in
+            guard let self = self else { return }
+            if room.members.count > 2 {
+                Task { @MainActor in
+                    await self.leaveRoomIfNeeded()
+                }
+            }
         }
+
+        room.onStreamPublished { [weak self] publication in
+            guard let self = self else { return }
+            if publication.publisher.id == localMember.id {
+                return
+            }
+            Task { @MainActor in
+                await self.subscribeToPublication(publication, localMember: localMember)
+            }
+        }
+
+        room.onMemberLeft { [weak self] member in
+            guard let self = self else { return }
+            if member.id != localMember.id {
+                self.handleRemoteMediaDisconnected()
+            }
+        }
+    }
+
+    @MainActor
+    private func publishLocalStreams(localMember: LocalRoomMember) async throws {
+        let audioStream = try await LocalAudioStream.create()
+        let videoStream = try await LocalVideoStream.create()
+        let dataStream = LocalDataStream()
+        localAudioStream = audioStream
+        localVideoStream = videoStream
+        localDataStream = dataStream
+
+        attachLocalVideo()
+
+        roomPublications.append(try await localMember.publish(audioStream))
+        roomPublications.append(try await localMember.publish(videoStream))
+        roomPublications.append(try await localMember.publish(dataStream))
+    }
+
+    @MainActor
+    private func subscribeToPublication(_ publication: RoomPublication, localMember: LocalRoomMember) async {
+        do {
+            let subscription = try await localMember.subscribe(publication)
+            roomSubscriptions.append(subscription)
+            if let stream = subscription.stream as? RemoteVideoStream {
+                remoteVideoStream = stream
+                attachRemoteVideo()
+                handleRemoteMediaConnected()
+            } else if let stream = subscription.stream as? RemoteAudioStream {
+                remoteAudioStream = stream
+            } else if let stream = subscription.stream as? RemoteDataStream {
+                remoteDataStream = stream
+                setupRemoteDataCallbacks()
+                setupDataConnectionCallbacks()
+            }
+        } catch {
+            print("SkyWayRoom subscribe error: \(error)")
+        }
+    }
+
+    @MainActor
+    private func setupRemoteDataCallbacks() {
+        remoteDataStream?.onData { [weak self] data in
+            guard let self = self else { return }
+            self.handleReceivedData(data)
+        }
+    }
+
+    @MainActor
+    private func leaveRoomIfNeeded() async {
+        if let localMember = localMember {
+            await localMember.leave()
+        }
+        room = nil
+        localMember = nil
+        roomClosed = true
+    }
+    
+    private func attachLocalVideo() {
+        if localVideoView == nil {
+            localVideoView = VideoView(frame: localStreamView.bounds)
+            if let localVideoView = localVideoView {
+                localVideoView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                localStreamView.addSubview(localVideoView)
+            }
+        }
+        if let localVideoStream = localVideoStream, let localVideoView = localVideoView {
+            localVideoStream.addRenderer(localVideoView)
+        }
+    }
+
+    private func attachRemoteVideo() {
+        if remoteVideoView == nil {
+            remoteVideoView = VideoView(frame: remoteStreamView.bounds)
+            if let remoteVideoView = remoteVideoView {
+                remoteVideoView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                remoteStreamView.addSubview(remoteVideoView)
+            }
+        }
+        if let remoteVideoStream = remoteVideoStream, let remoteVideoView = remoteVideoView {
+            remoteVideoStream.addRenderer(remoteVideoView)
+        }
+    }
+
+    func detachLocalVideo() {
+        localVideoStream?.removeRenderer(localVideoView)
+        localVideoView?.removeFromSuperview()
+        localVideoView = nil
+    }
+
+    func detachRemoteVideo() {
+        remoteVideoStream?.removeRenderer(remoteVideoView)
+        remoteVideoView?.removeFromSuperview()
+        remoteVideoView = nil
     }
 }
 
@@ -433,10 +511,18 @@ extension WaitViewController{
         
         //ヘッドフォン端子に何らかの変化があった場合
         //停止して1秒後に再始動を行う
-        self.appDelegate.localStream?.setEnableAudioTrack(0, enable: false)
+        if let localAudioStream = localAudioStream {
+            localAudioStream.setEnabled(false)
+        } else {
+            self.appDelegate.localStream?.setEnableAudioTrack(0, enable: false)
+        }
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) {
             // headphone
-            self.appDelegate.localStream?.setEnableAudioTrack(0, enable: true)
+            if let localAudioStream = self.localAudioStream {
+                localAudioStream.setEnabled(true)
+            } else {
+                self.appDelegate.localStream?.setEnableAudioTrack(0, enable: true)
+            }
         }
     }
     
@@ -505,6 +591,19 @@ extension WaitViewController{
                 }
             }
         })
+    }
+
+    func handleRemoteMediaConnected() {
+        self.addAudioSessionObservers()
+    }
+
+    func handleRemoteMediaDisconnected() {
+        DispatchQueue.main.async {
+            if(self.listenerErrorFlg == 0){
+                self.listenerStatus = 1//重要
+                //end of 異常終了の場合のみここで処理終わり
+            }
+        }
     }
 
     //チャットのコールバック
@@ -770,51 +869,7 @@ extension WaitViewController{
         //何かメッセージがきた時に呼ばれる
         dataConnection.on(SKWDataConnectionEventEnum.DATACONNECTION_EVENT_DATA, callback: { (obj) -> Void in
             let strValue:String = obj as! String
-            
-            if(strValue.contains("画面リフレッシュ"))
-            {
-                
-                self.isReconnect = true
-                /***************************/
-                //ラベル作成
-                /***************************/
-                self.castSelectedDialog.infoLbl.frame = CGRect(x:0, y:0, width:UIScreen.main.bounds.width, height:0)
-                // テキストを中央寄せ
-                self.castSelectedDialog.infoLbl.attributedText = UtilFunc.getInsertIconString(string: "画面をリフレッシュしています。", iconImage: UIImage(), iconSize: self.iconSize, lineHeight: 1.5)
-                //self.infoLbl.textAlignment = NSTextAlignment.center
-                self.castSelectedDialog.infoLbl.font = UIFont.boldSystemFont(ofSize: 15)
-                self.castSelectedDialog.infoLbl.sizeToFit()
-                self.castSelectedDialog.infoLbl.center = self.castSelectedDialog.center
-                //最前面へ
-                self.castSelectedDialog.infoLbl.isHidden = false
-                self.castSelectedDialog.bringSubviewToFront(self.castSelectedDialog.infoLbl)
-                /***************************/
-                //ラベル作成(ここまで)
-                /***************************/
-                
-                self.castSelectedDialog.closeBtn.isHidden = true
-
-                self.castSelectedDialog.isHidden = false
-                //self.view.bringSubviewToFront(self.castSelectedDialog)
-                self.appDelegate.window!.bringSubviewToFront(self.castSelectedDialog)
-                return
-            }
-            print("get data: \(strValue)")
-            let message = Message(sender: Message.SenderType.get, text: strValue)
-            //self.messages.insert(message, at: 0)
-            self.messages.insert(message, at: self.messages.count)//下から上に投稿を流す場合
-            
-            //MediaConnectionViewController.messageTableView.reloadData()
-            self.castWaitDialog.messageTableView.reloadData()
-            
-            if(strValue.hasPrefix("$$$_nocoin_")) {
-                //リスナーがコイン不足のとき（強制的にチャット領域を表示）
-                self.castWaitDialog.messageTableView.isHidden = false//タイムラインを表示
-                self.liveTimelineFlg = 1
-                
-                //タイムラインアイコンを選択中のアイコンに変更する
-                self.timelineBtn.image = UIImage(named: "lm_ico_on")!.withRenderingMode(UIImage.RenderingMode.alwaysOriginal)
-            }
+            self.handleReceivedText(strValue)
         })
         
         // MARK: DATACONNECTION_EVENT_CLOSE
@@ -838,17 +893,255 @@ extension WaitViewController{
             }
         })
     }
+
+    private func handleDataConnectionOpen() {
+        //20201118 add
+        self.startConnection()
+        
+        //（一時的異常状態に）初期化する
+        self.listenerErrorFlg = 0
+        //正常状態に初期化する
+        self.listenerStatus = 0//重要
+        
+        //待機中はオブジェクトを全てhiddenに>接続されると表示
+        //messageTextField.isHidden = true
+        self.countDownLabel.isHidden = false
+        self.userIconImageView.isHidden = false
+        self.endCallButton.isHidden = false
+        
+        //ダイアログ関連を非表示にしておく
+        self.castWaitDialog.allCoverMessage.isHidden = true
+        self.castWaitDialog.re_connect_label.isHidden = true
+        self.castWaitDialog.topInfoLabel.isHidden = true
+        
+        if(self.appDelegate.reserveStatus == "1"){
+            //配信中の状態へ(待機状態から接続状態になったときのみ、下記を実行)
+            UtilFunc.loginDo(user_id:self.user_id, status:2, live_user_id: self.appDelegate.live_target_user_id, reserve_flg:Int(self.appDelegate.reserveFlg)!, max_reserve_count:Int(self.appDelegate.reserveMaxCount)!, password:"0")
+            
+            //通話状態へ
+            self.appDelegate.reserveStatus = "2"
+
+            //絆レベル課金ポイントのボーナス比率など相手との情報を取得
+            UtilFunc.getConnectInfo(my_user_id:self.user_id, target_user_id:self.appDelegate.live_target_user_id)
+
+            //復帰時にここを通るか？
+            //print(self.appDelegate.reserveStatus)
+            self.countDownLabel.isHidden = false
+            self.userIconImageView.isHidden = false
+            self.endCallButton.isHidden = false
+            
+            //お知らせのところ
+            self.oshiraseView.isHidden = true
+            //右上のスター受信のところ
+            self.starGetView.isHidden = true
+            
+            //ユーザーアイコンにアクションの設定
+            self.userIconImageView.isUserInteractionEnabled = true
+            self.userIconImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(self.userIconImageViewTapped(_:))))
+
+            //ターゲットユーザーの情報を取得する
+            //情報取得時にユーザーアイコンに画像を設定する
+            self.getTargetInfo(target_id : self.appDelegate.live_target_user_id)
+            
+            //ターゲットユーザーのダイアログを作成しておく
+            self.userInfoDialog = UINib(nibName: "OnLiveUserInfo", bundle: nil).instantiate(withOwner: self,options: nil)[0] as! OnLiveUserInfo
+            //最初は非表示(リスナー情報ダイアログ)
+            //画面サイズに合わせる
+            self.userInfoDialog.frame = self.view.frame
+            // 貼り付ける
+            self.view.addSubview(self.userInfoDialog)
+            self.userInfoDialog.isHidden = true
+
+            //もしタイマーが実行中だったらスタートしない
+            if(self.timerLive.isValid == true){
+                //何も処理しない
+            }else{
+                //配信時間のクリア
+                self.appDelegate.count = 0
+                
+                //タイマーをスタート
+                self.timerLive = Timer.scheduledTimer(timeInterval:1.0,
+                                                      target: self,
+                                                      selector: #selector(self.timerInterruptLive(_:)),
+                                                      userInfo: nil,
+                                                      repeats: true)
+            }
+            
+            //重要(リアルタイムデータベースを使用)
+            self.conditionRef = self.rootRef.child(Util.INIT_FIREBASE + "/"
+                + String(self.user_id) + "/" + String(self.appDelegate.live_target_user_id))
+
+            //イベント監視
+            self.handle = self.conditionRef.observe(.value, with: { snap in
+                //print("ノードの値が変わりました！: \((snap.value as AnyObject).description)")
+                
+                if(snap.exists() == false){
+                    //UtilLog.printf(str:"すでにデータがない(キャスト側)")
+                    return
+                }
+                
+                //let dict = snap.value as! [String : AnyObject]
+                let dict = snap.value as! NSDictionary
+                //print(dict.values)
+
+                //status_listener = 5:異常終了からの復帰(リスナー側)
+                //０：サシライブ中でない、１：待機が完了、２：サシライブ中、３：バツボタンで終了、
+                //４：コインがなく延長ができなくなった時、５：リスナーが異常終了した時(未使用)、
+                //６：リスナーが異常終了から復帰した時、7：復帰完了（一時的）＞リスナー側は現時間を反映し「２：サシライブ中」に状態変更する
+                let status_listener = dict["status_listener"] as! Int
+                
+                if(status_listener == 3 || status_listener == 4){
+                    //リスナーがバツボタンを押して終わった(またはリスナーのコインがなくなった場合)
+                    //self.commonWaitDo()
+                    self.commonWaitDo(status:1)
+                }else if(status_listener == 6){
+                    //この時点でリスナーとの接続が復活している
+                    if(self.appDelegate.count >= self.appDelegate.init_seconds - 10){
+                        //ここは通常処理されないが、念のため
+                        //50秒(10秒前は復帰できない)を経過していたら待機状態へ
+                        if(self.appDelegate.reserveStatus == "5"){
+                            //予約がある時
+                            self.commonWaitDo(status:8)
+                        }else{
+                            self.commonWaitDo(status:1)
+                        }
+
+                    }else{
+                        //現時点の時間をセットし、リスナーの状態を「復帰完了」にする（リスナーと合わせる）
+                        let data = ["live_time": self.appDelegate.count, "status_listener": 7]
+                        self.conditionRef.updateChildValues(data)
+                        
+                        //復帰のメッセージ関連
+                        self.castWaitDialog.showMessageDo(message:"リスナーとの通信が回復しました。\nサシライブを続けてください。", font: 15)
+
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                            // 5.0秒後に実行したい処理
+                            self.castWaitDialog.delMessageDo()
+                        }
+                    }
+                    
+                    return
+                }
+
+                //延長時のスターをゲット
+                let cast_add_star = dict["cast_add_star"] as! Int
+                let cast_add_point = dict["cast_add_point"] as! Int
+                if(cast_add_star > 0 || cast_add_point > 0){
+                    //0に戻す
+                    let data = ["cast_add_star": 0, "cast_add_point": 0]
+                    self.conditionRef.updateChildValues(data)
+
+                    //配信経験値/スターの加算・配信レベルの計算・アプリ内の値を更新・配信ポイント履歴に保存
+                    //type:1:配信による経験値 2:プレゼントによる経験値3:延長による経験値99:没収したスター
+                    self.getLivePoint(type:3,
+                                      cast_id:self.user_id,
+                                      user_id:self.appDelegate.live_target_user_id,
+                                      point_num:cast_add_point,
+                                      star_num:cast_add_star,
+                                      live_count:0,
+                                      seconds:Util.INIT_EX_UNIT_SECONDS,
+                                      re_star:0,
+                                      action_flg:1)
+                    
+                    return
+                }
+                
+                //プレゼントゲット
+                let present_star = dict["present_star"] as! Int
+                let present_point = dict["present_point"] as! Int
+                let present_id = dict["present_id"] as! Int
+                
+                if(present_star > 0 || present_point > 0){
+                    //0に戻す
+                    let data = ["present_star": 0, "present_point": 0]
+                    self.conditionRef.updateChildValues(data)
+
+                    //配信経験値/スターの加算・配信レベルの計算・アプリ内の値を更新・配信ポイント履歴に保存
+                    //type:1:配信による経験値 2:プレゼントによる経験値3:延長による経験値99:没収したスター
+                    self.getLivePoint(type:2,
+                                      cast_id:self.user_id,
+                                      user_id:self.appDelegate.live_target_user_id,
+                                      point_num:present_point,
+                                      star_num:present_star,
+                                      live_count:0,
+                                      seconds:0,
+                                      re_star:0,
+                                      action_flg:1)
+                    
+                    //プレゼント履歴の保存
+                    UtilFunc.saveChatRireki(type:2, from_user_id:self.appDelegate.live_target_user_id, to_user_id:self.user_id, present_id:present_id, chat_text:"", status:1)
+                    
+                    return
+                }
+            })
+        }
+    }
+
+    private func handleReceivedData(_ data: Data) {
+        guard let strValue = String(data: data, encoding: .utf8) else {
+            return
+        }
+        handleReceivedText(strValue)
+    }
+
+    private func handleReceivedText(_ strValue: String) {
+        if(strValue.contains("画面リフレッシュ"))
+        {
+            //このメッセージは特別扱い
+            self.castSelectedDialog.infoLbl.frame = CGRect(x:0, y:0, width:UIScreen.main.bounds.width, height:0)
+            // テキストを中央寄せ
+            self.castSelectedDialog.infoLbl.attributedText = UtilFunc.getInsertIconString(string: "画面をリフレッシュしています。", iconImage: UIImage(), iconSize: self.iconSize, lineHeight: 1.5)
+            self.castSelectedDialog.infoLbl.font = UIFont.boldSystemFont(ofSize: 15)
+            self.castSelectedDialog.infoLbl.sizeToFit()
+            self.castSelectedDialog.infoLbl.center = self.castSelectedDialog.center
+            self.castSelectedDialog.infoLbl.isHidden = false
+            self.castSelectedDialog.bringSubviewToFront(self.castSelectedDialog.infoLbl)
+            self.castSelectedDialog.closeBtn.isHidden = true
+            self.castSelectedDialog.isHidden = false
+            self.appDelegate.window!.bringSubviewToFront(self.castSelectedDialog)
+            return
+        }
+        print("get data: \(strValue)")
+        let message = Message(sender: Message.SenderType.get, text: strValue)
+        //self.messages.insert(message, at: 0)
+        self.messages.insert(message, at: self.messages.count)//下から上に投稿を流す場合
+        
+        //MediaConnectionViewController.messageTableView.reloadData()
+        self.castWaitDialog.messageTableView.reloadData()
+        
+        if(strValue.hasPrefix("$$$_nocoin_")) {
+            //リスナーがコイン不足のとき（強制的にチャット領域を表示）
+            self.castWaitDialog.messageTableView.isHidden = false//タイムラインを表示
+            self.liveTimelineFlg = 1
+            
+            //タイムラインアイコンを選択中のアイコンに変更する
+            self.timelineBtn.image = UIImage(named: "lm_ico_on")!.withRenderingMode(UIImage.RenderingMode.alwaysOriginal)
+        }
+    }
+
+    func setupDataConnectionCallbacks() {
+        self.handleDataConnectionOpen()
+    }
+
+    private func sendDataMessage(_ text: String) {
+        if let localDataStream = localDataStream {
+            let data = Data(text.utf8)
+            localDataStream.write(data)
+        } else {
+            self.dataConnection?.send(text as NSObject)
+        }
+    }
     
     func send(text: String) {
         //$$$から始まる文字列はスタンプとする
         if(text.contains("画面リフレッシュ"))
         {
             isReconnect = true
-            self.dataConnection?.send(text as NSObject)
+            self.sendDataMessage(text)
         }else if (!text.hasPrefix("$$$") && text != "") {
             print("送信した文字列")
             print(text)
-            self.dataConnection?.send(text as NSObject)
+            self.sendDataMessage(text)
             let message = Message(sender: Message.SenderType.send, text: text)
             print(message.text as Any)
             //self.messages.insert(message, at: 0)
@@ -873,7 +1166,7 @@ extension WaitViewController{
                 //スタンプの送信(そのままの文字列を入れる。画像用のCellを使用するため)
                 send_text = text
             }
-            self.dataConnection?.send(send_text as NSObject)
+            self.sendDataMessage(send_text)
             let message = Message(sender: Message.SenderType.send, text: send_text)
             self.messages.insert(message, at: self.messages.count)//下から上に投稿を流す場合
             

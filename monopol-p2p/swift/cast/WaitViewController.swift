@@ -8,6 +8,7 @@
 
 import UIKit
 import SkyWay
+import SkyWayRoom
 import AVFoundation
 import ReverseExtension
 import Firebase
@@ -94,6 +95,20 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     //skyway関連
     /*************************************/
     var dataConnection: SKWDataConnection?
+    private var room: Room?
+    private var localMember: LocalRoomMember?
+    private var roomPublications: [RoomPublication] = []
+    private var roomSubscriptions: [RoomSubscription] = []
+    private var localVideoStream: LocalVideoStream?
+    private var localAudioStream: LocalAudioStream?
+    private var localDataStream: LocalDataStream?
+    private var remoteVideoStream: RemoteVideoStream?
+    private var remoteAudioStream: RemoteAudioStream?
+    private var remoteDataStream: RemoteDataStream?
+    private var localVideoView: VideoView?
+    private var remoteVideoView: VideoView?
+    private var roomTask: Task<Void, Never>?
+    private var roomClosed = false
     var messages = [Message]()
     struct Message{
         enum SenderType:String{
