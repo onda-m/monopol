@@ -17,9 +17,6 @@ extension MediaConnectionViewController{
         roomClosed = true
         roomTask?.cancel()
         roomTask = nil
-        roomSubscriptions.forEach { subscription in
-            subscription.cancel()
-        }
         roomSubscriptions.removeAll()
         roomPublications.forEach { publication in
             publication.cancel()
