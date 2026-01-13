@@ -1,38 +1,19 @@
-name: Generate Podfile.lock
+- name: Locate Podfile
+  run: |
+    echo "Listing files:"
+    ls -la
+    echo "Searching Podfile..."
+    find . -maxdepth 6 -iname "podfile" -print
 
-on:
-  workflow_dispatch:
-
-permissions:
-  contents: write
-
-jobs:
-  pod_install:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      # CocoaPods が古い/入ってない場合に備えてセットアップ（任意だけど安定）
-      - name: Setup CocoaPods
-        uses: maxim-lobanov/setup-cocoapods@v1
-        with:
-          version: "1.15.2"
-
-      - name: Pod install
-        run: |
-          pod repo update
-          pod install --verbose
-
-      - name: Commit Podfile.lock (if changed)
-        run: |
-          git status
-          if git diff --quiet -- Podfile.lock; then
-            echo "Podfile.lock unchanged"
-            exit 0
-          fi
-
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Podfile.lock
-          git commit -m "Update Podfile.lock via GitHub Actions"
-          git push
+- name: Pod install (in Podfile dir)
+  run: |
+    PODFILE_PATH="$(find . -maxdepth 6 -iname 'podfile' | head -n 1)"
+    if [ -z "$PODFILE_PATH" ]; then
+      echo "Podfile not found"
+      exit 1
+    fi
+    POD_DIR="$(dirname "$PODFILE_PATH")"
+    echo "Podfile found at: $PODFILE_PATH"
+    cd "$POD_DIR"
+    pod repo update
+    pod install --verbose
