@@ -8,6 +8,7 @@
 
 import UIKit
 import SkyWay
+import SkyWayRoom
 import AVFoundation
 import ReverseExtension
 import Firebase
@@ -94,6 +95,20 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     //skyway関連
     /*************************************/
     var dataConnection: SKWDataConnection?
+    private var room: Room?
+    private var localMember: LocalRoomMember?
+    private var roomPublications: [RoomPublication] = []
+    private var roomSubscriptions: [RoomSubscription] = []
+    private var localVideoStream: LocalVideoStream?
+    private var localAudioStream: LocalAudioStream?
+    private var localDataStream: LocalDataStream?
+    private var remoteVideoStream: RemoteVideoStream?
+    private var remoteAudioStream: RemoteAudioStream?
+    private var remoteDataStream: RemoteDataStream?
+    private var localVideoView: VideoView?
+    private var remoteVideoView: VideoView?
+    var roomTask: Task<Void, Never>?
+    var roomClosed = false
     var messages = [Message]()
     struct Message{
         enum SenderType:String{
@@ -679,34 +694,9 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             //print("フォアグラウンド復帰時")
             //self.setup()
 
-            UtilFunc.isPeerIdExist(peer: self.peer!, peerId: String(self.user_id)){ (flg) in
-                if(flg == false){
-                    //接続されていない場合(バックグラウンドにある場合)
-                    //正常状態(人的操作によるもの)にする
-                    self.listenerErrorFlg = 1
-                    self.appDelegate.localStream!.removeVideoRenderer(self.localStreamView, track: 0)
-                    
-                    let option: SKWPeerOption = SKWPeerOption.init();
-                    option.key = Util.skywayAPIKey
-                    option.domain = Util.skywayDomain
-                    
-                    //peer = SKWPeer(options: option)
-                    //idにはuser_idを入れる
-                    self.peer = SKWPeer(id: String(self.user_id), options: option)
-                    
-                    if let _peer = self.peer{
-                        self.setupPeerCallBacks(peer: _peer)
-                        self.setupStream(peer: _peer)
-                    }else{
-                        print("failed to create peer setup")
-                    }
-                    
-                }else{
-                    //PEERだけが繋がっている場合
-                    //一旦ローカルストリームをクローズ(必須)
-                    //if(self.localStream != nil){
-                }
-            }
+            self.listenerErrorFlg = 1
+            self.sessionClose()
+            self.setup()
             
             //もしタイマーが停止中だったら実行
             self.startEffectTimer()
