@@ -1,0 +1,11 @@
+# Xcode archives / packaging artifacts
+*.ipa
+*.xcarchive
+
+# Packaging logs / summaries
+**/Packaging.log
+**/DistributionSummary.plist
+
+# Build log directories
+**/Logs/
+**/logs/
