@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SkyWay
 import SkyWayRoom
 import AVFoundation
 import ReverseExtension
@@ -26,7 +27,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     //選択した時に重ねるView
     var castSelectedDialog = UINib(nibName: "CastSelectedDialog", bundle: nil).instantiate(withOwner: self,options: nil)[0] as! CastSelectedDialog
     let iconSize: CGFloat = 16.0//ライブ時間の左側のアイコンの大きさ
-    var first_flg = 0
+    var first_flg = 0//1だとSKWMediaConstraintsを設定してはならない
     
     private var myTabBar:UITabBar!
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -93,24 +94,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     /*************************************/
     //skyway関連
     /*************************************/
-    var room: Room?
-    var localMember: LocalRoomMember?
-    var roomPublications: [RoomPublication] = []
-    var roomSubscriptions: [RoomSubscription] = []
-    var waitRoom: Room?
-    var waitLocalMember: LocalRoomMember?
-    var waitRoomTask: Task<Void, Never>?
-    var waitRoomClosed = false
-    var localVideoStream: LocalVideoStream?
-    var localAudioStream: LocalAudioStream?
-    var localDataStream: LocalDataStream?
-    var remoteVideoStream: RemoteVideoStream?
-    var remoteAudioStream: RemoteAudioStream?
-    var remoteDataStream: RemoteDataStream?
-    var localVideoView: VideoView?
-    var remoteVideoView: VideoView?
-    var roomTask: Task<Void, Never>?
-    var roomClosed = false
+    var dataConnection: SKWDataConnection?
     var messages = [Message]()
     struct Message{
         enum SenderType:String{
@@ -121,7 +105,12 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         var text:String?
     }
 
-    @IBOutlet weak var videoContainerView: UIView!
+    //ストリーマー側ライブ配信の接続用
+    var peer: SKWPeer?
+    var mediaConnection: SKWMediaConnection?
+    
+    @IBOutlet weak var localStreamView: SKWVideo!
+    @IBOutlet weak var remoteStreamView: SKWVideo!//使用しないのでhiddenに
     /*************************************/
     //skyway関連(ここまで)
     /*************************************/
@@ -329,33 +318,33 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
          */
         
         if(width_hi > height_hi){
-            self.videoContainerView.transform = CGAffineTransform(scaleX: CGFloat(width_hi), y: CGFloat(width_hi));
+            self.localStreamView.transform = CGAffineTransform(scaleX: CGFloat(width_hi), y: CGFloat(width_hi));
         }else{
-            self.videoContainerView.transform = CGAffineTransform(scaleX: CGFloat(height_hi), y: CGFloat(height_hi));
+            self.localStreamView.transform = CGAffineTransform(scaleX: CGFloat(height_hi), y: CGFloat(height_hi));
         }
         
-        //作成されたvideoContainerViewと比べて縦、横の比がどちらが小さいかを比較（大きい方の倍率で縦横に縮小する）
-        let width_hi_localStreamView = self.view.frame.width / self.videoContainerView.frame.width
-        let height_hi_localStreamView = self.view.frame.height / self.videoContainerView.frame.height
+        //作成されたlocalStreamViewと比べて縦、横の比がどちらが小さいかを比較（大きい方の倍率で縦横に縮小する）
+        let width_hi_localStreamView = self.view.frame.width / self.localStreamView.frame.width
+        let height_hi_localStreamView = self.view.frame.height / self.localStreamView.frame.height
         
         if(width_hi_localStreamView > height_hi_localStreamView){
-            //self.videoContainerView.transform = CGAffineTransform(scaleX: CGFloat(width_hi), y: CGFloat(width_hi));
-            let rect:CGRect = CGRect(x:0, y:0, width:self.videoContainerView.frame.width * width_hi_localStreamView, height:self.videoContainerView.frame.height * width_hi_localStreamView)
-            self.videoContainerView.frame = rect
+            //self.localStreamView.transform = CGAffineTransform(scaleX: CGFloat(width_hi), y: CGFloat(width_hi));
+            let rect:CGRect = CGRect(x:0, y:0, width:self.localStreamView.frame.width * width_hi_localStreamView, height:self.localStreamView.frame.height * width_hi_localStreamView)
+            self.localStreamView.frame = rect
             
             //print(self.localStreamView.frame.width)
             //print(self.localStreamView.frame.height)
         }else{
-            //self.videoContainerView.transform = CGAffineTransform(scaleX: CGFloat(height_hi), y: CGFloat(height_hi));
-            let rect:CGRect = CGRect(x:0, y:0, width:self.videoContainerView.frame.width * height_hi_localStreamView, height:self.videoContainerView.frame.height * height_hi_localStreamView)
-            self.videoContainerView.frame = rect
+            //self.localStreamView.transform = CGAffineTransform(scaleX: CGFloat(height_hi), y: CGFloat(height_hi));
+            let rect:CGRect = CGRect(x:0, y:0, width:self.localStreamView.frame.width * height_hi_localStreamView, height:self.localStreamView.frame.height * height_hi_localStreamView)
+            self.localStreamView.frame = rect
             
             //print(self.localStreamView.frame.width)
             //print(self.localStreamView.frame.height)
         }
 
         //中央に合わせる
-        self.videoContainerView.center = self.view.center
+        self.localStreamView.center = self.view.center
 
         self.screenshotManageMainView.isHidden = true
         self.effectListDialog.isHidden = true
@@ -394,13 +383,13 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         self.countDownLabel.layer.masksToBounds = true
         
         //機能廃止
-        //※お知らせ 必要に応じて以下のようなメッセージを流す(2行か3行) 各メッセージは5秒ほどで消える
-        //・ランクがアップしました(R47)
-        //・2枠目をやじさんが予約しました
-        //・1枠目終了まであと1分
-        //・1枠目終了まであと30秒
-        //・1枠目終了まであと15秒
-        //・まつさんからスクショリクエストがありました
+        //※お知らせ 必要に応じて以下のようなメッセージを流す(2行か3行) 各メッセージは5秒ほどで消える
+        //・ランクがアップしました(R47)
+        //・2枠目をやじさんが予約しました
+        //・1枠目終了まであと1分
+        //・1枠目終了まであと30秒
+        //・1枠目終了まであと15秒
+        //・まつさんからスクショリクエストがありました
         //・まつさんにスクショを送りました
         // 角丸
         self.oshiraseView.layer.cornerRadius = 8
@@ -580,7 +569,8 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             self.view.bringSubviewToFront(self.busyIndicator)
         }
             
-        //self.videoContainerView.frame = self.view.frame
+        //self.localStreamView.frame = self.view.frame
+        //self.localStreamView.videoGravity = .resizeAspectFill
         /*
             //letinaかどうかの判断
             let letina_num = UIScreen.main.scale
@@ -687,9 +677,34 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             //print("フォアグラウンド復帰時")
             //self.setup()
 
-            self.listenerErrorFlg = 1
-            self.sessionClose()
-            self.setup()
+            UtilFunc.isPeerIdExist(peer: self.peer!, peerId: String(self.user_id)){ (flg) in
+                if(flg == false){
+                    //接続されていない場合(バックグラウンドにある場合)
+                    //正常状態(人的操作によるもの)にする
+                    self.listenerErrorFlg = 1
+                    self.appDelegate.localStream!.removeVideoRenderer(self.localStreamView, track: 0)
+                    
+                    let option: SKWPeerOption = SKWPeerOption.init();
+                    option.key = Util.skywayAPIKey
+                    option.domain = Util.skywayDomain
+                    
+                    //peer = SKWPeer(options: option)
+                    //idにはuser_idを入れる
+                    self.peer = SKWPeer(id: String(self.user_id), options: option)
+                    
+                    if let _peer = self.peer{
+                        self.setupPeerCallBacks(peer: _peer)
+                        self.setupStream(peer: _peer)
+                    }else{
+                        print("failed to create peer setup")
+                    }
+                    
+                }else{
+                    //PEERだけが繋がっている場合
+                    //一旦ローカルストリームをクローズ(必須)
+                    //if(self.localStream != nil){
+                }
+            }
             
             //もしタイマーが停止中だったら実行
             self.startEffectTimer()
@@ -865,9 +880,9 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
                         
                         self.commonWaitDo(status:1)
                     }
-        let rect = videoContainerView.bounds
-        videoContainerView.layer.render(in: context)
-        self.localVideoStream?.setEnabled(false)
+                }
+            }
+        }else{
             //復帰できなくなった場合
             //待機中の時の非表示・表示
             //各オブジェクトの表示（常に表示しておきたいので、念のため、ここでも必要。）
@@ -1129,8 +1144,8 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         //print("タップ")
         //ツールバーを表示する(念のため)
         myTabBar.isHidden = true
-            self.localVideoStream?.setEnabled(true)
-            self.localVideoStream?.setEnabled(true)
+        captureToolbar.isHidden = false
+        self.view.bringSubviewToFront(captureToolbar)
 
         takeStillPicture()
     }
@@ -1235,37 +1250,43 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             //待機状態の時は「送信」でなく「保存」
             //写真ダイアログを表示
             let castPhotoDialog:CastScreenshotDialog = UINib(nibName: "CastScreenshotDialog", bundle: nil).instantiate(withOwner: self,options: nil)[0] as! CastScreenshotDialog
-                return
-            }
+            //画面サイズに合わせる
+            castPhotoDialog.frame = self.view.frame
+            
+            // 貼り付ける
+            self.view.addSubview(castPhotoDialog)
+        }
+    }
 
-            guard let dict = snap.value as? [String: Any] else {
-                return
-            }
-            if(dict["user_id"] == nil || dict["cast_id"] == nil){
-                //いったんFireBaseのデータを削除する
-                //self.rootRef.child(Util.INIT_FIREBASE + "/" + String(self.user_id)).removeValue()
+    //フォアグラウンドなどではなく、この画面に遷移したときにだけ実行される。（1度のみ実行）
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        // 子ノード condition への参照
+        self.castWaitConditionRef = self.rootRef.child(Util.INIT_FIREBASE + "/"
+            + String(self.user_id))
+        // クラウド上で、ノード Util.INIT_FIREBASE に変更があった場合のコールバック処理
+        self.request_handler = self.castWaitConditionRef.observe(.value) { (snap: DataSnapshot) in
+            //self.conditionRef.removeObserver(withHandle: handler)
+
+            if(snap.exists() == false){
+                //UtilLog.printf(str:"すでにデータがない(ストリーマー側)")
+                
+                //全て非表示
+                self.castWaitDialog.allCoverMessage.isHidden = true
+                self.castWaitDialog.allCoverRequest.isHidden = true
+                self.castWaitDialog.topInfoLabel.isHidden = true
+
                 return
             }
             
-            self.castWaitDialog.get_user_id  = dict["user_id"] as! Int
-            self.castWaitDialog.get_cast_id  = dict["cast_id"] as! Int
-            //status = 1:申請中 2:申請したけど拒否された 3:申請が取り消された 99:接続が承認された
-            self.castWaitDialog.status  = dict["status"] as! Int
-            
-            if(self.user_id == self.castWaitDialog.get_cast_id && self.castWaitDialog.status == 1){
-                //自分への通常リクエストの場合
-                self.castWaitDialog.get_user_name  = dict["user_name"] as? String
-                self.castWaitDialog.get_user_photo_flg = dict["user_photo_flg"] as! Int
-                self.castWaitDialog.get_user_photo_name = dict["user_photo_name"] as? String
-
-                UtilFunc.isPeerIdExist(peer: self.peer!, peerId: String(self.user_id)){ (flg) in
-                    if(flg == false){
-                        //接続されていない場合(バックグラウンドにある場合)
-                        //ここでは何もしない＞処理は、WaitViewController+CommonSkywayの待機完了後に行う。
-                    }else{
-                    if self.isWaitingRoomConnected() {
-                        //フォアグラウンドにある場合
-                        self.castWaitDialog.requestDialogDo()
+            for item in (snap.children) {
+                // 中身の取り出し
+                let snapshot = item as! DataSnapshot
+                let dict = snapshot.value as! [String: Any]
+                print(dict)
+                //print(dict["user_id"] as Any)
+                //print(dict["cast_id"] as Any)
                 
                 if(dict["user_id"] == nil || dict["cast_id"] == nil){
                     //いったんFireBaseのデータを削除する
