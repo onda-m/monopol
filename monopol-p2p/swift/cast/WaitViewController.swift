@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import SkyWay
 import SkyWayRoom
 import AVFoundation
 import ReverseExtension
@@ -27,7 +26,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     //選択した時に重ねるView
     var castSelectedDialog = UINib(nibName: "CastSelectedDialog", bundle: nil).instantiate(withOwner: self,options: nil)[0] as! CastSelectedDialog
     let iconSize: CGFloat = 16.0//ライブ時間の左側のアイコンの大きさ
-    var first_flg = 0//1だとSKWMediaConstraintsを設定してはならない
+    var first_flg = 0
     
     private var myTabBar:UITabBar!
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -94,7 +93,6 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     /*************************************/
     //skyway関連
     /*************************************/
-    var dataConnection: SKWDataConnection?
     var room: Room?
     var localMember: LocalRoomMember?
     var roomPublications: [RoomPublication] = []
@@ -123,15 +121,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         var text:String?
     }
 
-    //ストリーマー側ライブ配信の接続用
-    var peer: SKWPeer?
-    //var peer_temp: SKWPeer?//ダミー用
-    var mediaConnection: SKWMediaConnection?
-    //var localStream: SKWMediaStream?
-//    var remoteStream: SKWMediaStream?//重要
-    
-    @IBOutlet weak var localStreamView: SKWVideo!
-    @IBOutlet weak var remoteStreamView: SKWVideo!//使用しないのでhiddenに
+    @IBOutlet weak var videoContainerView: UIView!
     /*************************************/
     //skyway関連(ここまで)
     /*************************************/
@@ -339,33 +329,33 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
          */
         
         if(width_hi > height_hi){
-            self.localStreamView.transform = CGAffineTransform(scaleX: CGFloat(width_hi), y: CGFloat(width_hi));
+            self.videoContainerView.transform = CGAffineTransform(scaleX: CGFloat(width_hi), y: CGFloat(width_hi));
         }else{
-            self.localStreamView.transform = CGAffineTransform(scaleX: CGFloat(height_hi), y: CGFloat(height_hi));
+            self.videoContainerView.transform = CGAffineTransform(scaleX: CGFloat(height_hi), y: CGFloat(height_hi));
         }
         
-        //作成されたlocalStreamViewと比べて縦、横の比がどちらが小さいかを比較（大きい方の倍率で縦横に縮小する）
-        let width_hi_localStreamView = self.view.frame.width / self.localStreamView.frame.width
-        let height_hi_localStreamView = self.view.frame.height / self.localStreamView.frame.height
+        //作成されたvideoContainerViewと比べて縦、横の比がどちらが小さいかを比較（大きい方の倍率で縦横に縮小する）
+        let width_hi_localStreamView = self.view.frame.width / self.videoContainerView.frame.width
+        let height_hi_localStreamView = self.view.frame.height / self.videoContainerView.frame.height
         
         if(width_hi_localStreamView > height_hi_localStreamView){
-            //self.localStreamView.transform = CGAffineTransform(scaleX: CGFloat(width_hi), y: CGFloat(width_hi));
-            let rect:CGRect = CGRect(x:0, y:0, width:self.localStreamView.frame.width * width_hi_localStreamView, height:self.localStreamView.frame.height * width_hi_localStreamView)
-            self.localStreamView.frame = rect
+            //self.videoContainerView.transform = CGAffineTransform(scaleX: CGFloat(width_hi), y: CGFloat(width_hi));
+            let rect:CGRect = CGRect(x:0, y:0, width:self.videoContainerView.frame.width * width_hi_localStreamView, height:self.videoContainerView.frame.height * width_hi_localStreamView)
+            self.videoContainerView.frame = rect
             
             //print(self.localStreamView.frame.width)
             //print(self.localStreamView.frame.height)
         }else{
-            //self.localStreamView.transform = CGAffineTransform(scaleX: CGFloat(height_hi), y: CGFloat(height_hi));
-            let rect:CGRect = CGRect(x:0, y:0, width:self.localStreamView.frame.width * height_hi_localStreamView, height:self.localStreamView.frame.height * height_hi_localStreamView)
-            self.localStreamView.frame = rect
+            //self.videoContainerView.transform = CGAffineTransform(scaleX: CGFloat(height_hi), y: CGFloat(height_hi));
+            let rect:CGRect = CGRect(x:0, y:0, width:self.videoContainerView.frame.width * height_hi_localStreamView, height:self.videoContainerView.frame.height * height_hi_localStreamView)
+            self.videoContainerView.frame = rect
             
             //print(self.localStreamView.frame.width)
             //print(self.localStreamView.frame.height)
         }
 
         //中央に合わせる
-        self.localStreamView.center = self.view.center
+        self.videoContainerView.center = self.view.center
 
         self.screenshotManageMainView.isHidden = true
         self.effectListDialog.isHidden = true
@@ -590,8 +580,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             self.view.bringSubviewToFront(self.busyIndicator)
         }
             
-        //self.localStreamView.frame = self.view.frame
-        //self.localStreamView.videoGravity = .resizeAspectFill
+        //self.videoContainerView.frame = self.view.frame
         /*
             //letinaかどうかの判断
             let letina_num = UIScreen.main.scale
@@ -876,9 +865,9 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
                         
                         self.commonWaitDo(status:1)
                     }
-                }
-            }
-        }else{
+        let rect = videoContainerView.bounds
+        videoContainerView.layer.render(in: context)
+        self.localVideoStream?.setEnabled(false)
             //復帰できなくなった場合
             //待機中の時の非表示・表示
             //各オブジェクトの表示（常に表示しておきたいので、念のため、ここでも必要。）
@@ -1140,8 +1129,8 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         //print("タップ")
         //ツールバーを表示する(念のため)
         myTabBar.isHidden = true
-        captureToolbar.isHidden = false
-        self.view.bringSubviewToFront(captureToolbar)
+            self.localVideoStream?.setEnabled(true)
+            self.localVideoStream?.setEnabled(true)
 
         takeStillPicture()
     }
@@ -1273,14 +1262,9 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
                 self.castWaitDialog.allCoverRequest.isHidden = true
                 self.castWaitDialog.topInfoLabel.isHidden = true
 
-                return
-            }
                     if self.isWaitingRoomConnected() {
                         //フォアグラウンドにある場合
                         self.castWaitDialog.requestDialogDo()
-                    } else {
-                        //接続されていない場合(バックグラウンドにある場合)
-                        //ここでは何もしない＞処理は、WaitViewController+CommonSkywayの待機完了後に行う。
                 
                 if(dict["user_id"] == nil || dict["cast_id"] == nil){
                     //いったんFireBaseのデータを削除する
@@ -1417,10 +1401,8 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     //待機状態にするための共通処理
     //statusには１(予約なし)か８(予約あり)が入る
     //予約は廃止
-    func commonWaitDo(status:Int){
-        //待機状態へ
-        //くるくる表示開始
-        if(self.busyIndicator.isDescendant(of: self.view)){
+        self.closeMedia()
+        self.sessionClose()
             //すでに追加(addsubview)済み
             //画面サイズに合わせる
             self.busyIndicator.frame = self.view.frame
