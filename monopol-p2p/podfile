@@ -9,9 +9,6 @@ use_frameworks!
 inhibit_all_warnings!
 
 target 'swift_skyway' do
-  # 旧SkyWay（段階移行中）
-  pod 'SkyWay'
-
   # 新SkyWay Room SDK
   pod 'SkyWayRoom', '3.1.1'
 
