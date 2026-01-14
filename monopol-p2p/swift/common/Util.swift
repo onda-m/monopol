@@ -70,7 +70,15 @@ class Util {
         }
 
         let task = Task {
-            try await SkyWayRoom.Context.setup(withToken: Util.skywayRoomToken, options: nil)
+            // SkyWay Room SDK 初期化の切り替え
+            // - 固定トークンを使う場合はこちらを有効化
+            // try await SkyWayRoom.Context.setup(withToken: Util.skywayRoomToken, options: nil)
+            // - Application ID / Secret Key を使う場合はこちらを有効化
+            try await SkyWayRoom.Context.setup(
+                withAppId: Util.skywayApplicationId,
+                secretKey: Util.skywaySecretKey,
+                options: nil
+            )
         }
         skywayRoomContextTask = task
         try await task.value
