@@ -40,7 +40,7 @@ extension WaitViewController{
             
             //print(self.appDelegate.init_seconds)
             
-            if(self.isReconnect == false)
+            if(roomSession.state != .reconnecting)
             {
                 /***************************************************/
                 //スターの追加処理
@@ -103,7 +103,7 @@ extension WaitViewController{
                 UtilFunc.modifyLiveRequestStatusByOne(user_id:self.user_id, listener_user_id:self.appDelegate.live_target_user_id, request_status:1)
             }
 
-            self.isReconnect = false
+            roomSession.markConnected()
             
         }
 
@@ -120,30 +120,19 @@ extension WaitViewController{
     }
     
     func closeMedia() {
-        roomClosed = true
-        roomTask?.cancel()
-        roomTask = nil
+        Task { @MainActor in
+            await roomSession.stop()
+        }
         waitRoomClosed = true
         waitRoomTask?.cancel()
         waitRoomTask = nil
-        roomSubscriptions.removeAll()
-        roomPublications.forEach { publication in
-            publication.cancel()
-        }
-        roomPublications.removeAll()
-        localDataStream = nil
-        localAudioStream = nil
-        localVideoStream = nil
-        remoteVideoStream = nil
-        remoteAudioStream = nil
-        remoteDataStream = nil
-        detachLocalVideo()
-        detachRemoteVideo()
+        roomSession.detachLocalVideo(from: localStreamView)
+        roomSession.detachRemoteVideo(from: remoteStreamView)
     }
     
     func sessionClose() {
         Task { @MainActor in
-            await leaveRoomIfNeeded()
+            await roomSession.stop()
             await leaveWaitRoomIfNeeded()
         }
     }
@@ -174,11 +163,7 @@ extension WaitViewController{
             self.view.bringSubviewToFront(self.busyIndicator)
         }
         
-        roomClosed = false
-        roomTask?.cancel()
-        roomTask = Task { @MainActor in
-            await joinRoomIfNeeded(roomName: String(self.user_id), memberName: String(self.user_id))
-        }
+        startRoomSessionIfNeeded()
         
         waitRoomClosed = false
         waitRoomTask?.cancel()
@@ -195,30 +180,6 @@ extension WaitViewController{
         }
     }
 
-    @MainActor
-    private func joinRoomIfNeeded(roomName: String, memberName: String) async {
-        guard roomClosed == false else { return }
-
-        do {
-            try await Util.setupSkyWayRoomContextIfNeeded()
-            let room = try await Room.findOrCreate(withName: roomName, type: .p2p)
-            self.room = room
-
-            let localMember = try await room.join(withName: memberName)
-            self.localMember = localMember
-
-            if room.members.count > 2 {
-                await leaveRoomIfNeeded()
-                return
-            }
-
-            attachRoomCallbacks(room: room, localMember: localMember)
-            try await publishLocalStreams(localMember: localMember)
-        } catch {
-            print("SkyWayRoom join error: \(error)")
-        }
-    }
-    
     @MainActor
     private func joinWaitRoomIfNeeded(roomName: String, memberName: String) async {
         guard waitRoomClosed == false else { return }
@@ -240,88 +201,6 @@ extension WaitViewController{
     }
 
     @MainActor
-    private func attachRoomCallbacks(room: Room, localMember: LocalRoomMember) {
-        room.onMemberJoined { [weak self] _ in
-            guard let self = self else { return }
-            if room.members.count > 2 {
-                Task { @MainActor in
-                    await self.leaveRoomIfNeeded()
-                }
-            }
-        }
-
-        room.onStreamPublished { [weak self] publication in
-            guard let self = self else { return }
-            if publication.publisher.id == localMember.id {
-                return
-            }
-            Task { @MainActor in
-                await self.subscribeToPublication(publication, localMember: localMember)
-            }
-        }
-
-        room.onMemberLeft { [weak self] member in
-            guard let self = self else { return }
-            if member.id != localMember.id {
-                self.handleRemoteMediaDisconnected()
-            }
-        }
-    }
-
-    @MainActor
-    private func publishLocalStreams(localMember: LocalRoomMember) async throws {
-        let audioStream = try await LocalAudioStream.create()
-        let videoStream = try await LocalVideoStream.create()
-        let dataStream = LocalDataStream()
-        localAudioStream = audioStream
-        localVideoStream = videoStream
-        localDataStream = dataStream
-
-        roomPublications.append(try await localMember.publish(audioStream))
-        roomPublications.append(try await localMember.publish(videoStream))
-        roomPublications.append(try await localMember.publish(dataStream))
-    }
-
-    @MainActor
-    private func subscribeToPublication(_ publication: RoomPublication, localMember: LocalRoomMember) async {
-        do {
-            let subscription = try await localMember.subscribe(publication)
-            roomSubscriptions.append(subscription)
-            if let stream = subscription.stream as? RemoteVideoStream {
-                remoteVideoStream = stream
-                attachRemoteVideo()
-                handleRemoteMediaConnected()
-            } else if let stream = subscription.stream as? RemoteAudioStream {
-                remoteAudioStream = stream
-            } else if let stream = subscription.stream as? RemoteDataStream {
-                remoteDataStream = stream
-                setupRemoteDataCallbacks()
-                setupDataConnectionCallbacks()
-            }
-        } catch {
-            print("SkyWayRoom subscribe error: \(error)")
-        }
-    }
-
-    @MainActor
-    private func setupRemoteDataCallbacks() {
-        remoteDataStream?.onData { [weak self] data in
-            guard let self = self else { return }
-            self.handleReceivedData(data)
-        }
-    }
-
-    @MainActor
-    private func leaveRoomIfNeeded() async {
-        if let localMember = localMember {
-            await localMember.leave()
-        }
-        room = nil
-        localMember = nil
-        roomClosed = true
-    }
-    
-    @MainActor
     private func leaveWaitRoomIfNeeded() async {
         if let waitLocalMember = waitLocalMember {
             await waitLocalMember.leave()
@@ -332,28 +211,31 @@ extension WaitViewController{
     }
     
     private func attachRemoteVideo() {
-        if remoteVideoView == nil {
-            remoteVideoView = VideoView(frame: videoContainerView.bounds)
-            if let remoteVideoView = remoteVideoView {
-                remoteVideoView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-                videoContainerView.addSubview(remoteVideoView)
-            }
-        }
-        if let remoteVideoStream = remoteVideoStream, let remoteVideoView = remoteVideoView {
-            remoteVideoStream.addRenderer(remoteVideoView)
-        }
+        roomSession.attachRemoteVideo(to: remoteStreamView)
+    }
+}
+
+// MARK: SkyWayRoomSession delegate
+extension WaitViewController: SkyWayRoomSessionDelegate {
+    @MainActor
+    func roomSession(_ session: SkyWayRoomSession, didReceiveRemoteData data: Data) {
+        handleReceivedData(data)
     }
 
-    func detachLocalVideo() {
-        localVideoStream?.removeRenderer(localVideoView)
-        localVideoView?.removeFromSuperview()
-        localVideoView = nil
+    @MainActor
+    func roomSession(_ session: SkyWayRoomSession, didReceiveRemoteVideo stream: RemoteVideoStream) {
+        attachRemoteVideo()
+        handleRemoteMediaConnected()
     }
 
-    func detachRemoteVideo() {
-        remoteVideoStream?.removeRenderer(remoteVideoView)
-        remoteVideoView?.removeFromSuperview()
-        remoteVideoView = nil
+    @MainActor
+    func roomSession(_ session: SkyWayRoomSession, didReceiveRemoteAudio stream: RemoteAudioStream) {
+        handleRemoteMediaConnected()
+    }
+
+    @MainActor
+    func roomSessionDidOpenDataChannel(_ session: SkyWayRoomSession) {
+        setupDataConnectionCallbacks()
     }
 }
 
@@ -379,12 +261,12 @@ extension WaitViewController{
         
         //ヘッドフォン端子に何らかの変化があった場合
         //停止して1秒後に再始動を行う
-        if let localAudioStream = localAudioStream {
+        if let localAudioStream = roomSession.localAudioStream {
             localAudioStream.setEnabled(false)
         }
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) {
             // headphone
-            if let localAudioStream = self.localAudioStream {
+            if let localAudioStream = self.roomSession.localAudioStream {
                 localAudioStream.setEnabled(true)
             }
         }
@@ -393,14 +275,14 @@ extension WaitViewController{
     /*
     // イヤホン（ヘッドホン出力）の場合
     func remoteAudioDefault() {
-        self.localAudioStream?.setEnabled(false)
+        self.roomSession.localAudioStream?.setEnabled(false)
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) {
           // headphone
           do {
               try AVAudioSession.sharedInstance().setActive(true)
               try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playAndRecord)
               try AVAudioSession.sharedInstance().overrideOutputAudioPort(AVAudioSession.PortOverride.none)
-              self.localAudioStream?.setEnabled(true)
+              self.roomSession.localAudioStream?.setEnabled(true)
               UtilLog.printf(str:"イヤホン（ヘッドホン出力）")
           } catch {
             print("AVAudioSessionCategoryPlayAndRecord error")
@@ -410,7 +292,7 @@ extension WaitViewController{
     
     // 内臓スピーカー出力の場合
     func remoteAudioSpeaker() {
-        self.localAudioStream?.setEnabled(false)
+        self.roomSession.localAudioStream?.setEnabled(false)
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) {
           // speaker
           do {
@@ -419,7 +301,7 @@ extension WaitViewController{
               try audioSession.setMode(AVAudioSession.Mode.videoChat)
               try audioSession.overrideOutputAudioPort(AVAudioSession.PortOverride.speaker)
               try audioSession.setActive(true)
-              self.localAudioStream?.setEnabled(true)
+              self.roomSession.localAudioStream?.setEnabled(true)
               UtilLog.printf(str:"remoteAudioSpeaker:内臓スピーカー出力")
           } catch {
             print("AVAudioSessionCategoryPlayAndRecord error")
@@ -673,7 +555,7 @@ extension WaitViewController{
     }
 
     private func sendDataMessage(_ text: String) {
-        guard let localDataStream = localDataStream else {
+        guard let localDataStream = roomSession.localDataStream else {
             return
         }
         let data = Data(text.utf8)
@@ -684,7 +566,7 @@ extension WaitViewController{
         //$$$から始まる文字列はスタンプとする
         if(text.contains("画面リフレッシュ"))
         {
-            isReconnect = true
+            roomSession.markReconnecting()
             self.sendDataMessage(text)
         }else if (!text.hasPrefix("$$$") && text != "") {
             print("送信した文字列")

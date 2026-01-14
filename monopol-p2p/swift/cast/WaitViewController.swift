@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import SkyWay
 import SkyWayRoom
 import AVFoundation
 import ReverseExtension
@@ -19,7 +18,7 @@ import FirebaseDatabase
 class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabBarDelegate,UICollectionViewDataSource,UICollectionViewDelegate,UICollectionViewDelegateFlowLayout {
     
     @IBOutlet weak var refreshBtn: UIButton!
-    var isReconnect = false
+    private let roomSession = SkyWayRoomSession()
     
     //監視関連
     let center = NotificationCenter.default
@@ -27,7 +26,6 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     //選択した時に重ねるView
     var castSelectedDialog = UINib(nibName: "CastSelectedDialog", bundle: nil).instantiate(withOwner: self,options: nil)[0] as! CastSelectedDialog
     let iconSize: CGFloat = 16.0//ライブ時間の左側のアイコンの大きさ
-    var first_flg = 0//1だとSKWMediaConstraintsを設定してはならない
     
     private var myTabBar:UITabBar!
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -94,7 +92,6 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     /*************************************/
     //skyway関連
     /*************************************/
-    var dataConnection: SKWDataConnection?
     var messages = [Message]()
     struct Message{
         enum SenderType:String{
@@ -105,12 +102,14 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         var text:String?
     }
 
-    //ストリーマー側ライブ配信の接続用
-    var peer: SKWPeer?
-    var mediaConnection: SKWMediaConnection?
-    
-    @IBOutlet weak var localStreamView: SKWVideo!
-    @IBOutlet weak var remoteStreamView: SKWVideo!//使用しないのでhiddenに
+    private var waitRoom: Room?
+    private var waitLocalMember: LocalRoomMember?
+    private var waitRoomTask: Task<Void, Never>?
+    private var waitRoomClosed = false
+
+    // StoryboardのCustom ClassはSKWVideoViewに変更すること
+    @IBOutlet weak var localStreamView: SKWVideoView!
+    @IBOutlet weak var remoteStreamView: SKWVideoView!//使用しないのでhiddenに
     /*************************************/
     //skyway関連(ここまで)
     /*************************************/
@@ -169,6 +168,8 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        roomSession.delegate = self
         
         let mainBoundSize: CGSize = UIScreen.main.bounds.size
         self.castSelectedDialog.frame = CGRect(x: 0, y: -50, width: mainBoundSize.width, height: mainBoundSize.height + 100)
@@ -676,34 +677,10 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         if (self.isViewLoaded && (self.view.window != nil)) {
             //print("フォアグラウンド復帰時")
             //self.setup()
-
-            UtilFunc.isPeerIdExist(peer: self.peer!, peerId: String(self.user_id)){ (flg) in
-                if(flg == false){
-                    //接続されていない場合(バックグラウンドにある場合)
-                    //正常状態(人的操作によるもの)にする
-                    self.listenerErrorFlg = 1
-                    self.appDelegate.localStream!.removeVideoRenderer(self.localStreamView, track: 0)
-                    
-                    let option: SKWPeerOption = SKWPeerOption.init();
-                    option.key = Util.skywayAPIKey
-                    option.domain = Util.skywayDomain
-                    
-                    //peer = SKWPeer(options: option)
-                    //idにはuser_idを入れる
-                    self.peer = SKWPeer(id: String(self.user_id), options: option)
-                    
-                    if let _peer = self.peer{
-                        self.setupPeerCallBacks(peer: _peer)
-                        self.setupStream(peer: _peer)
-                    }else{
-                        print("failed to create peer setup")
-                    }
-                    
-                }else{
-                    //PEERだけが繋がっている場合
-                    //一旦ローカルストリームをクローズ(必須)
-                    //if(self.localStream != nil){
-                }
+            if roomSession.isConnected == false {
+                self.listenerErrorFlg = 1
+                roomSession.detachLocalVideo(from: self.localStreamView)
+                self.startRoomSessionIfNeeded()
             }
             
             //もしタイマーが停止中だったら実行
@@ -717,7 +694,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             UtilLog.printf(str: "フォアグラウンド")
             
             //skywayの待機処理
-            if(peer == nil || peer?.isDisconnected == true){
+            if roomSession.isConnected == false {
                 self.set_up()
             }
         }
@@ -860,7 +837,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             //2:リスナーが異常状態(1度エラー処理を実行して待機中)
             if(self.listenerStatus == 0 || self.listenerStatus == 1){
                 
-                if(isReconnect == false &&  self.listenerStatus == 1){
+                if(roomSession.state != .reconnecting && self.listenerStatus == 1){
                     
                     //リスナーが異常切断してしまった場合
                     //ラベルなどはすでに表示済み。
@@ -1278,16 +1255,37 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
                 self.castWaitDialog.topInfoLabel.isHidden = true
 
                 return
+                    if roomSession.isConnected {
+                        self.castWaitDialog.requestDialogDo()
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        startRoomSessionIfNeeded()
+    }
+
+    private func startRoomSessionIfNeeded() {
+        if roomSession.state != .idle {
+            return
+        }
+        Task { @MainActor in
+            do {
+                try await roomSession.start(
+                    roomName: String(self.user_id),
+                    token: Util.skywayRoomToken,
+                    role: .caster,
+                    memberName: String(self.user_id)
+                )
+                roomSession.attachLocalVideo(to: self.localStreamView)
+                roomSession.attachRemoteVideo(to: self.remoteStreamView)
+            } catch {
+                print("SkyWayRoomSession start error: \(error)")
             }
-            
-            for item in (snap.children) {
-                // 中身の取り出し
-                let snapshot = item as! DataSnapshot
-                let dict = snapshot.value as! [String: Any]
-                print(dict)
-                //print(dict["user_id"] as Any)
-                //print(dict["cast_id"] as Any)
-                
+        }
+    }
+
+        Task { @MainActor in
+            await roomSession.stop()
+        }
                 if(dict["user_id"] == nil || dict["cast_id"] == nil){
                     //いったんFireBaseのデータを削除する
                     //self.rootRef.child(Util.INIT_FIREBASE + "/" + String(self.user_id)).removeValue()
@@ -1423,10 +1421,9 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     //待機状態にするための共通処理
     //statusには１(予約なし)か８(予約あり)が入る
     //予約は廃止
-    func commonWaitDo(status:Int){
-        //待機状態へ
-        //くるくる表示開始
-        if(self.busyIndicator.isDescendant(of: self.view)){
+        Task { @MainActor in
+            await roomSession.stop()
+        }
             //すでに追加(addsubview)済み
             //画面サイズに合わせる
             self.busyIndicator.frame = self.view.frame
