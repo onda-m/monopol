@@ -5,6 +5,7 @@
 //
 
 import Foundation
+import SkyWayRoom
 import UIKit
 
 //TIPS
@@ -58,6 +59,22 @@ import UIKit
 //コレクションビューのループができない
 
 class Util {
+    @MainActor
+    private static var skywayRoomContextTask: Task<Void, Error>?
+
+    @MainActor
+    static func setupSkyWayRoomContextIfNeeded() async throws {
+        if let task = skywayRoomContextTask {
+            try await task.value
+            return
+        }
+
+        let task = Task {
+            try await SkyWayRoom.Context.setup(withToken: Util.skywayRoomToken, options: nil)
+        }
+        skywayRoomContextTask = task
+        try await task.value
+    }
     /***********************************************************/
     //アプリ内で保持する値メモ
     /***********************************************************/

@@ -92,13 +92,11 @@ extension MediaConnectionViewController{
         guard roomClosed == false else { return }
 
         do {
-            try await SkyWayRoom.Context.setup(withToken: Util.skywayRoomToken, options: nil)
-            let roomConfig = RoomConfig(name: roomName, type: .p2p)
-            let room = try await Room.findOrCreate(with: roomConfig)
+            try await Util.setupSkyWayRoomContextIfNeeded()
+            let room = try await Room.findOrCreate(withName: roomName, type: .p2p)
             self.room = room
 
-            let memberConfig = RoomMemberConfig(name: memberName)
-            let localMember = try await room.join(with: memberConfig)
+            let localMember = try await room.join(withName: memberName)
             self.localMember = localMember
 
             if room.members.count > 2 {
