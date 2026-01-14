@@ -83,6 +83,8 @@ class Util {
         skywayRoomContextTask = task
         try await task.value
     }
+    
+    static let skywayWaitingRoomName = "waiting-room"
     /***********************************************************/
     //アプリ内で保持する値メモ
     /***********************************************************/
