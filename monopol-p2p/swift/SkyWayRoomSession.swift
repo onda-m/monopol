@@ -47,6 +47,9 @@ final class SkyWayRoomSession {
         case reconnecting
     }
 
+}
+
+final class SkyWayRoomSession {
     private static var contextTask: Task<Void, Error>?
 
     private(set) var room: Room?
@@ -104,6 +107,20 @@ final class SkyWayRoomSession {
     func stop() async {
         roomClosed = true
         state = .idle
+    func joinRoom(name: String, memberName: String, token: String, roomType: RoomType = .p2p) async throws {
+        roomClosed = false
+        try await setupContextIfNeeded(token: token)
+        let room = try await Room.findOrCreate(withName: name, type: roomType)
+        self.room = room
+        let localMember = try await room.join(withName: memberName)
+        self.localMember = localMember
+        attachRoomCallbacks(room: room, localMember: localMember)
+        try await publishLocalStreams(localMember: localMember)
+    }
+
+    @MainActor
+    func leaveRoom() async {
+        roomClosed = true
         subscriptions.forEach { $0.cancel() }
         subscriptions.removeAll()
         publications.forEach { $0.cancel() }
@@ -124,6 +141,7 @@ final class SkyWayRoomSession {
     @MainActor
     func dispose() async {
         await stop()
+        await leaveRoom()
         delegate = nil
     }
 
@@ -217,6 +235,10 @@ final class SkyWayRoomSession {
             } else if let stream = subscription.stream as? RemoteDataStream {
                 remoteDataStream = stream
                 delegate?.roomSessionDidOpenDataChannel(self)
+            } else if let stream = subscription.stream as? RemoteAudioStream {
+                remoteAudioStream = stream
+            } else if let stream = subscription.stream as? RemoteDataStream {
+                remoteDataStream = stream
                 stream.onData { [weak self] data in
                     guard let self = self else { return }
                     Task { @MainActor in
@@ -229,6 +251,10 @@ final class SkyWayRoomSession {
         }
     }
 }
+
+protocol SkyWayAttachableVideoView: AnyObject {}
+
+extension VideoView: SkyWayAttachableVideoView {}
 
 extension LocalVideoStream {
     func attach(_ videoView: VideoView) {
@@ -251,3 +277,4 @@ extension RemoteVideoStream {
 }
 
 final class SKWVideoView: VideoView {}
+}
