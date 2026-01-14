@@ -1465,7 +1465,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/Pods/SkyWay",
 				);
 				INFOPLIST_FILE = swift/resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
@@ -1510,7 +1509,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/Pods/SkyWay",
 				);
 				INFOPLIST_FILE = swift/resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
