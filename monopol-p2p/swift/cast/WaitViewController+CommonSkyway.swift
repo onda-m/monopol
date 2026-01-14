@@ -19,6 +19,10 @@ extension WaitViewController{
         //正常状態に初期化する
         self.listenerStatus = 0//重要
         
+        Task { @MainActor in
+            await leaveWaitRoomIfNeeded()
+        }
+        
         self.castSelectedDialog.isHidden = true
 
         DispatchQueue.main.async {
@@ -120,6 +124,9 @@ extension WaitViewController{
         roomClosed = true
         roomTask?.cancel()
         roomTask = nil
+        waitRoomClosed = true
+        waitRoomTask?.cancel()
+        waitRoomTask = nil
         roomSubscriptions.removeAll()
         roomPublications.forEach { publication in
             publication.cancel()
@@ -138,6 +145,7 @@ extension WaitViewController{
     func sessionClose() {
         Task { @MainActor in
             await leaveRoomIfNeeded()
+            await leaveWaitRoomIfNeeded()
         }
     }
     
@@ -173,6 +181,12 @@ extension WaitViewController{
             await joinRoomIfNeeded(roomName: String(self.user_id), memberName: String(self.user_id))
         }
         
+        waitRoomClosed = false
+        waitRoomTask?.cancel()
+        waitRoomTask = Task { @MainActor in
+            await joinWaitRoomIfNeeded(roomName: Util.skywayWaitingRoomName, memberName: String(self.user_id))
+        }
+        
         self.busyIndicator.removeFromSuperview()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
@@ -204,6 +218,26 @@ extension WaitViewController{
         } catch {
             print("SkyWayRoom join error: \(error)")
         }
+    }
+    
+    @MainActor
+    private func joinWaitRoomIfNeeded(roomName: String, memberName: String) async {
+        guard waitRoomClosed == false else { return }
+
+        do {
+            try await Util.setupSkyWayRoomContextIfNeeded()
+            let waitRoom = try await Room.findOrCreate(withName: roomName, type: .sfu)
+            self.waitRoom = waitRoom
+
+            let waitLocalMember = try await waitRoom.join(withName: memberName)
+            self.waitLocalMember = waitLocalMember
+        } catch {
+            print("SkyWayRoom wait room join error: \(error)")
+        }
+    }
+
+    func isWaitingRoomConnected() -> Bool {
+        return waitLocalMember != nil && waitRoomClosed == false
     }
 
     @MainActor
@@ -288,6 +322,16 @@ extension WaitViewController{
         room = nil
         localMember = nil
         roomClosed = true
+    }
+    
+    @MainActor
+    private func leaveWaitRoomIfNeeded() async {
+        if let waitLocalMember = waitLocalMember {
+            await waitLocalMember.leave()
+        }
+        waitRoom = nil
+        waitLocalMember = nil
+        waitRoomClosed = true
     }
     
     private func attachLocalVideo() {

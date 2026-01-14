@@ -99,6 +99,10 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     var localMember: LocalRoomMember?
     var roomPublications: [RoomPublication] = []
     var roomSubscriptions: [RoomSubscription] = []
+    var waitRoom: Room?
+    var waitLocalMember: LocalRoomMember?
+    var waitRoomTask: Task<Void, Never>?
+    var waitRoomClosed = false
     var localVideoStream: LocalVideoStream?
     var localAudioStream: LocalAudioStream?
     var localDataStream: LocalDataStream?
@@ -1271,14 +1275,12 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
 
                 return
             }
-            
-            for item in (snap.children) {
-                // 中身の取り出し
-                let snapshot = item as! DataSnapshot
-                let dict = snapshot.value as! [String: Any]
-                print(dict)
-                //print(dict["user_id"] as Any)
-                //print(dict["cast_id"] as Any)
+                    if self.isWaitingRoomConnected() {
+                        //フォアグラウンドにある場合
+                        self.castWaitDialog.requestDialogDo()
+                    } else {
+                        //接続されていない場合(バックグラウンドにある場合)
+                        //ここでは何もしない＞処理は、WaitViewController+CommonSkywayの待機完了後に行う。
                 
                 if(dict["user_id"] == nil || dict["cast_id"] == nil){
                     //いったんFireBaseのデータを削除する

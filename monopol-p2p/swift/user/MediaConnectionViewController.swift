@@ -196,6 +196,11 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
     private var localMember: LocalRoomMember?
     private var roomPublications: [RoomPublication] = []
     private var roomSubscriptions: [RoomSubscription] = []
+    private var waitRoom: Room?
+    private var waitLocalMember: LocalRoomMember?
+    private var waitRoomTask: Task<Void, Never>?
+    private var waitRoomClosed = false
+    private var waitingMemberIds: [String] = []
     private var localVideoStream: LocalVideoStream?
     private var localAudioStream: LocalAudioStream?
     private var localDataStream: LocalDataStream?

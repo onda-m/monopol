@@ -17,6 +17,9 @@ extension MediaConnectionViewController{
         roomClosed = true
         roomTask?.cancel()
         roomTask = nil
+        waitRoomClosed = true
+        waitRoomTask?.cancel()
+        waitRoomTask = nil
         roomSubscriptions.removeAll()
         roomPublications.forEach { publication in
             publication.cancel()
@@ -35,6 +38,7 @@ extension MediaConnectionViewController{
     func sessionClose() {
         Task { @MainActor in
             await leaveRoomIfNeeded()
+            await leaveWaitRoomIfNeeded()
         }
     }
     
@@ -43,6 +47,11 @@ extension MediaConnectionViewController{
         roomTask?.cancel()
         roomTask = Task { @MainActor in
             await joinRoomIfNeeded(roomName: liveCastId, memberName: String(self.user_id))
+        }
+        waitRoomClosed = false
+        waitRoomTask?.cancel()
+        waitRoomTask = Task { @MainActor in
+            await joinWaitRoomIfNeeded(roomName: Util.skywayWaitingRoomName, memberName: String(self.user_id))
         }
     }
 
@@ -112,6 +121,25 @@ extension MediaConnectionViewController{
     }
 
     @MainActor
+    private func joinWaitRoomIfNeeded(roomName: String, memberName: String) async {
+        guard waitRoomClosed == false else { return }
+
+        do {
+            try await Util.setupSkyWayRoomContextIfNeeded()
+            let waitRoom = try await Room.findOrCreate(withName: roomName, type: .sfu)
+            self.waitRoom = waitRoom
+
+            let waitLocalMember = try await waitRoom.join(withName: memberName)
+            self.waitLocalMember = waitLocalMember
+
+            attachWaitRoomCallbacks(room: waitRoom, localMember: waitLocalMember)
+            updateWaitingMembers(room: waitRoom)
+        } catch {
+            print("SkyWayRoom wait room join error: \(error)")
+        }
+    }
+
+    @MainActor
     private func attachRoomCallbacks(room: Room, localMember: LocalRoomMember) {
         room.onMemberJoined { [weak self] _ in
             guard let self = self else { return }
@@ -137,6 +165,32 @@ extension MediaConnectionViewController{
             if member.id != localMember.id {
                 self.handleRemoteMediaDisconnected()
             }
+        }
+    }
+
+    @MainActor
+    private func attachWaitRoomCallbacks(room: Room, localMember: LocalRoomMember) {
+        room.onMemberJoined { [weak self] _ in
+            guard let self = self else { return }
+            self.updateWaitingMembers(room: room)
+        }
+
+        room.onMemberLeft { [weak self] member in
+            guard let self = self else { return }
+            if member.id == localMember.id {
+                return
+            }
+            self.updateWaitingMembers(room: room)
+        }
+    }
+
+    @MainActor
+    private func updateWaitingMembers(room: Room) {
+        waitingMemberIds = room.members.map { member in
+            if let name = member.name, name.isEmpty == false {
+                return name
+            }
+            return member.id
         }
     }
 
@@ -193,6 +247,17 @@ extension MediaConnectionViewController{
         room = nil
         localMember = nil
         roomClosed = true
+    }
+
+    @MainActor
+    private func leaveWaitRoomIfNeeded() async {
+        if let waitLocalMember = waitLocalMember {
+            await waitLocalMember.leave()
+        }
+        waitRoom = nil
+        waitLocalMember = nil
+        waitRoomClosed = true
+        waitingMemberIds.removeAll()
     }
 
     /***************************/

@@ -126,28 +126,6 @@ class SkywayManager: NSObject {
         })
     }
     
-    //接続リストを取得する
-    public func getPeerList(delegate:SkywaySessionDelegate) {
-        
-        peer!.listAllPeers({obj in
-            
-            if let array:Array<String> = obj as? Array<String> {
-                let peerList:NSMutableArray = NSMutableArray()
-                
-                for id in array {
-                    if (id == self.peerId) {
-                        continue;
-                    }
-                    
-                    peerList.add(id)
-                }
-                
-                delegate.getPeerList(newPeerList:peerList)
-            }
-        })
-    }
-    
-    
     public func setWaitLocal(localView:SKWVideo, delegate:SkywaySessionDelegate) {
         sessionDelegate = nil
         sessionDelegate = delegate
