@@ -147,7 +147,10 @@ class Util {
     // https://webrtc.ecl.ntt.com/からAPIKeyとDomainを取得してください
     static let skywayAPIKey: String = "d53e1b48-2ef6-4649-93e4-3a69c66b6e28"
     static let skywayDomain: String = "localhost"
-    // SkyWay Room SDK 固定トークン（開発用）
+    // 新SkyWay用（開発用）
+    static let skywayApplicationId: String = "xxxxxxxx"
+    static let skywaySecretKey: String = "xxxxxxxx"
+    // 新SkyWay Room SDK 固定トークン（開発用）
     static let skywayRoomToken: String = "<fixed_token>"
     //firebaseのサーバーキー
     //サーバーキーは Firebase コンソールから、
