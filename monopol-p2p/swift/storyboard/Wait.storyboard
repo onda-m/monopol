@@ -837,12 +837,12 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view hidden="YES" clipsSubviews="YES" contentMode="scaleAspectFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="41k-Js-Jbu" customClass="SKWVideo">
+                            <view hidden="YES" clipsSubviews="YES" contentMode="scaleAspectFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="41k-Js-Jbu">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
-                            <view clipsSubviews="YES" contentMode="scaleAspectFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UXS-hh-yph" customClass="SKWVideo">
+                            <view clipsSubviews="YES" contentMode="scaleAspectFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UXS-hh-yph">
                                 <rect key="frame" x="40" y="124" width="334" height="648"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -1079,14 +1079,13 @@
                         <outlet property="endCallButton" destination="Ske-iJ-4qJ" id="juq-yP-ern"/>
                         <outlet property="livePointLbl" destination="Tdc-64-LgR" id="0Sj-6N-0Jm"/>
                         <outlet property="livePointView" destination="kCp-kE-NDj" id="Xt5-0t-rqH"/>
-                        <outlet property="localStreamView" destination="UXS-hh-yph" id="Y4l-3q-yXB"/>
+                        <outlet property="videoContainerView" destination="UXS-hh-yph" id="Y4l-3q-yXB"/>
                         <outlet property="nextWaitTimeLbl" destination="mts-ER-vJi" id="1Rd-y3-HhW"/>
                         <outlet property="nextWaitTimeView" destination="vgz-DV-ESj" id="dwj-PD-V6F"/>
                         <outlet property="oshiraseLbl" destination="jNB-X0-F1V" id="yy3-fr-jqt"/>
                         <outlet property="oshiraseView" destination="JcD-hs-rcm" id="gGP-ka-lyZ"/>
                         <outlet property="refreshBtn" destination="0jY-0l-dnh" id="L81-q2-h63"/>
-                        <outlet property="remoteStreamView" destination="41k-Js-Jbu" id="ZBv-Jm-6q8"/>
-                        <outlet property="reserveCountBtn" destination="yrt-Ib-bxA" id="RLW-0b-CWn"/>
+                                        <outlet property="reserveCountBtn" destination="yrt-Ib-bxA" id="RLW-0b-CWn"/>
                         <outlet property="reserveFlgBtn" destination="Ufg-hJ-H7e" id="a8b-DZ-Tfb"/>
                         <outlet property="screenshotManageMainCollectionView" destination="KQr-ls-Pcm" id="egq-36-WXx"/>
                         <outlet property="screenshotManageMainView" destination="VlM-YC-DqH" id="c3f-LL-ACs"/>

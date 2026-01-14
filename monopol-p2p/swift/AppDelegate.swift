@@ -6,7 +6,6 @@
 
 import UIKit
 import StoreKit
-import SkyWay
 import Firebase
 import Reachability
 import UserNotifications
@@ -20,9 +19,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate ,PurchaseManagerDelegate {
     //var navigationController: UINavigationController?
     
     //ストリーマー側ライブ配信の接続用
-    //var peer: SKWPeer?
-    var localStream: SKWMediaStream?
-    //var peerFlg: Int = 0//待機状態になると一時的に1になる。1の場合はPEERオブジェクトは初期化される
     
     // notification center (singleton)
     //let center = UNUserNotificationCenter.current()

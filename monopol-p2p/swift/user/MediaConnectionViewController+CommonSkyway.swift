@@ -6,7 +6,6 @@
 //  Copyright © 2018年 worldtrip. All rights reserved.
 //
 
-import SkyWay
 import SkyWayRoom
 import AVFoundation
 
@@ -530,220 +529,190 @@ extension MediaConnectionViewController{
 
     //通話のコールバック
     func handleRemoteMediaConnected() {
-
-        // MARK: MEDIACONNECTION_EVENT_STREAM
-        //相手につながった時に呼ばれる
-        mediaConnection.on(SKWMediaConnectionEventEnum.MEDIACONNECTION_EVENT_STREAM, callback: { (obj) -> Void in
-
-            if let msStream = obj as? SKWMediaStream{
-                
-                self.isReconnect = false
-                self.remoteStream = msStream
-                
-                DispatchQueue.main.async {
-                    //self.targetPeerIdLabel.text = self.remoteStream?.peerId
-                    //self.targetPeerIdLabel.textColor = UIColor.darkGray
-                    
-                    //20201118 comment out
-                    //self.castSelectedDialog.isHidden = true
-                    self.remoteStream?.addVideoRenderer(self.remoteStreamView, track: 0)
-                    
-                    //20201118追加
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 7.0) {
-                        self.castSelectedDialog.isHidden = true
-                    }
-                    
-                }
-                //self.changeConnectionStatusUI(connected: true)
+        self.isReconnect = false
+        DispatchQueue.main.async {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 7.0) {
+                self.castSelectedDialog.isHidden = true
             }
-            
-            //イヤホンの抜き差し対応
-            self.addAudioSessionObservers()
-            
-        })
-        
-        // MARK: MEDIACONNECTION_EVENT_CLOSE
-        //相手と切断された時に呼ばれる＞呼ばれる
-        mediaConnection.on(SKWMediaConnectionEventEnum.MEDIACONNECTION_EVENT_CLOSE, callback: { (obj) -> Void in
-            if let _ = obj as? SKWMediaConnection{
-                if(self.isReconnect == true)
-                {
-                    return
-                }
-                DispatchQueue.main.async {
-                    //ストリーマーの方の切断時処理はストリーマーの異常終了したときの処理と、ポイント関連の計算のみ
-                    if(self.appDelegate.listener_live_close_btn_tap_flg == 1){
-                        UserDefaults.standard.set(0, forKey: "live_cast_id")
-                        UserDefaults.standard.set("", forKey: "live_cast_name")
-                        self.endLiveDo()//これ重要（SKYWAYの接続を完全にクリア）
-                    }else{
-                        //ストリーマーの状態を取得
-                        var stringUrl = Util.URL_GET_LIVE_CAST_STATUS
-                        stringUrl.append("?user_id=")
-                        stringUrl.append(self.liveCastId)
-                        
-                        // Swift4からは書き方が変わりました。
-                        let url = URL(string: stringUrl.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)!)!
-                        let req = URLRequest(url: url)
-                        
-                        //非同期処理を行う
-                        let dispatchGroup = DispatchGroup()
-                        let dispatchQueue = DispatchQueue(label: "queue", attributes: .concurrent)
-                        
-                        dispatchGroup.enter()
-                        dispatchQueue.async {
-                            let task = URLSession.shared.dataTask(with: req, completionHandler: {
-                                (data, res, err) in
-                                do{
-                                    //JSONDecoderのインスタンス取得
-                                    let decoder = JSONDecoder()
-                                    //受けとったJSONデータをパースして格納
-                                    let json = try decoder.decode(UtilStruct.ResultCastInfoJson.self, from: data!)
-                                    //self.idCount = json.count
+        }
+        self.addAudioSessionObservers()
+    }
 
-                                    //ただしゼロ番目のみ参照可能
-                                    for obj in json.result {
-                                        self.cast_login_status_check = obj.login_status
-                                        self.cast_live_user_id_check = obj.live_user_id
-                                        self.cast_reserve_user_id_check = obj.reserve_user_id
-                                        self.cast_reserve_peer_id_check = obj.reserve_peer_id
-                                        self.cast_reserve_flg_check = obj.reserve_flg
+    func handleRemoteMediaDisconnected() {
+        if self.isReconnect {
+            return
+        }
+        DispatchQueue.main.async {
+            //ストリーマーの方の切断時処理はストリーマーの異常終了したときの処理と、ポイント関連の計算のみ
+            if self.appDelegate.listener_live_close_btn_tap_flg == 1 {
+                UserDefaults.standard.set(0, forKey: "live_cast_id")
+                UserDefaults.standard.set("", forKey: "live_cast_name")
+                self.endLiveDo()//これ重要（SKYWAYの接続を完全にクリア）
+            } else {
+                //ストリーマーの状態を取得
+                var stringUrl = Util.URL_GET_LIVE_CAST_STATUS
+                stringUrl.append("?user_id=")
+                stringUrl.append(self.liveCastId)
 
-                                        break
-                                    }
-                                    
-                                    //print(json.result)
-                                    dispatchGroup.leave()//サブタスク終了時に記述
-                                }catch{
-                                    //エラー処理
-                                    //print("エラーが出ました")
-                                }
-                            })
-                            task.resume()
+                // Swift4からは書き方が変わりました。
+                let url = URL(string: stringUrl.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)!)!
+                let req = URLRequest(url: url)
+
+                //非同期処理を行う
+                let dispatchGroup = DispatchGroup()
+                let dispatchQueue = DispatchQueue(label: "queue", attributes: .concurrent)
+
+                dispatchGroup.enter()
+                dispatchQueue.async {
+                    let task = URLSession.shared.dataTask(with: req, completionHandler: {
+                        (data, res, err) in
+                        do{
+                            //JSONDecoderのインスタンス取得
+                            let decoder = JSONDecoder()
+                            //受けとったJSONデータをパースして格納
+                            let json = try decoder.decode(UtilStruct.ResultCastInfoJson.self, from: data!)
+                            //self.idCount = json.count
+
+                            //ただしゼロ番目のみ参照可能
+                            for obj in json.result {
+                                self.cast_login_status_check = obj.login_status
+                                self.cast_live_user_id_check = obj.live_user_id
+                                self.cast_reserve_user_id_check = obj.reserve_user_id
+                                self.cast_reserve_peer_id_check = obj.reserve_peer_id
+                                self.cast_reserve_flg_check = obj.reserve_flg
+
+                                break
+                            }
+
+                            //print(json.result)
+                            dispatchGroup.leave()//サブタスク終了時に記述
+                        }catch{
+                            //エラー処理
+                            //print("エラーが出ました")
                         }
-                        // 全ての非同期処理完了後にメインスレッドで処理
-                        dispatchGroup.notify(queue: .main) {
-                            //ストリーマーの状態が1と８以外の場合（＝異常終了）
-                            if(self.cast_login_status_check != "1"
-                                && self.cast_login_status_check != "8"){
-                                //ストリーマーの異常終了に関してのみここで処理
-                                //１分以内の場合：コインの返却・スターの返却＞「返却はしない」に変更
-                                //延長時の場合：返却はしない
-                                if(self.appDelegate.count < self.appDelegate.init_seconds){
-                                    //１分以内の場合
-                                    //アラート履歴に保存する
-                                    //1:フリー 2:B 3:A 4:Aplus 5:s 6:ss 7:sss
-                                    //GET:alert_type, cast_id, user_id, cast_rank, live_time_count, star_temp, coin_temp
-                                    var stringUrl = Util.URL_ALERT_RIREKI
-                                    stringUrl.append("?alert_type=2&cast_id=")
-                                    stringUrl.append(String(self.appDelegate.request_cast_id))
-                                    stringUrl.append("&user_id=")
-                                    stringUrl.append(String(self.user_id))
-                                    stringUrl.append("&cast_rank=")
-                                    stringUrl.append(self.strCastRank)
-                                    stringUrl.append("&live_time_count=")
-                                    stringUrl.append(String(self.appDelegate.count))
-                                    stringUrl.append("&star_temp=")
-                                    stringUrl.append("0")//可能であれば入れたいが必須でない
-                                    stringUrl.append("&coin_temp=")
-                                    stringUrl.append("0")//可能であれば入れたいが必須でない
-                                    
-                                    print(stringUrl)
-                                    
-                                    // Swift4からは書き方が変わりました。
-                                    let url = URL(string: stringUrl.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)!)!
-                                    let req = URLRequest(url: url)
-                                    //非同期処理を行う
-                                    let dispatchGroup = DispatchGroup()
-                                    let dispatchQueue = DispatchQueue(label: "queue", attributes: .concurrent)
-                                    dispatchGroup.enter()
-                                    dispatchQueue.async {
-                                        let task = URLSession.shared.dataTask(with: req, completionHandler: {
-                                            (data, res, err) in
-                                            do{
-                                                //ここまでに処理を記述
-                                                dispatchGroup.leave()
-                                            }
-                                        })
-                                        task.resume()
+                    })
+                    task.resume()
+                }
+                // 全ての非同期処理完了後にメインスレッドで処理
+                dispatchGroup.notify(queue: .main) {
+                    //ストリーマーの状態が1と８以外の場合（＝異常終了）
+                    if(self.cast_login_status_check != "1"
+                        && self.cast_login_status_check != "8"){
+                        //ストリーマーの異常終了に関してのみここで処理
+                        //１分以内の場合：コインの返却・スターの返却＞「返却はしない」に変更
+                        //延長時の場合：返却はしない
+                        if(self.appDelegate.count < self.appDelegate.init_seconds){
+                            //１分以内の場合
+                            //アラート履歴に保存する
+                            //1:フリー 2:B 3:A 4:Aplus 5:s 6:ss 7:sss
+                            //GET:alert_type, cast_id, user_id, cast_rank, live_time_count, star_temp, coin_temp
+                            var stringUrl = Util.URL_ALERT_RIREKI
+                            stringUrl.append("?alert_type=2&cast_id=")
+                            stringUrl.append(String(self.appDelegate.request_cast_id))
+                            stringUrl.append("&user_id=")
+                            stringUrl.append(String(self.user_id))
+                            stringUrl.append("&cast_rank=")
+                            stringUrl.append(self.strCastRank)
+                            stringUrl.append("&live_time_count=")
+                            stringUrl.append(String(self.appDelegate.count))
+                            stringUrl.append("&star_temp=")
+                            stringUrl.append("0")//可能であれば入れたいが必須でない
+                            stringUrl.append("&coin_temp=")
+                            stringUrl.append("0")//可能であれば入れたいが必須でない
+
+                            print(stringUrl)
+
+                            // Swift4からは書き方が変わりました。
+                            let url = URL(string: stringUrl.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)!)!
+                            let req = URLRequest(url: url)
+                            //非同期処理を行う
+                            let dispatchGroup = DispatchGroup()
+                            let dispatchQueue = DispatchQueue(label: "queue", attributes: .concurrent)
+                            dispatchGroup.enter()
+                            dispatchQueue.async {
+                                let task = URLSession.shared.dataTask(with: req, completionHandler: {
+                                    (data, res, err) in
+                                    do{
+                                        //ここまでに処理を記述
+                                        dispatchGroup.leave()
                                     }
-                                    // 全ての非同期処理完了後にメインスレッドで処理
-                                    dispatchGroup.notify(queue: .main) {
-                                        //処理が終わった後に実行する処理
-                                        //firebaseのデータをリスナー側でクリア
-                                        self.rootRef.child(Util.INIT_FIREBASE
-                                            + "/" + String(self.appDelegate.request_cast_id)).removeValue()
-                                        
-                                        UserDefaults.standard.set(0, forKey: "live_cast_id")
-                                        UserDefaults.standard.set("", forKey: "live_cast_name")
-                                        
-                                        self.endLiveDo()
-                                    }
-                                }else{
-                                    //延長時の場合
-                                    //自分のuser_idを指定
-                                    //let user_id = UserDefaults.standard.integer(forKey: "user_id")
-                                    //1:フリー 2:B 3:A 4:Aplus 5:s 6:ss 7:sss
-                                    //GET:alert_type, cast_id, user_id, cast_rank, live_time_count, star_temp, coin_temp
-                                    var stringUrl = Util.URL_ALERT_RIREKI
-                                    stringUrl.append("?alert_type=2&cast_id=")
-                                    stringUrl.append(String(self.appDelegate.request_cast_id))
-                                    stringUrl.append("&user_id=")
-                                    stringUrl.append(String(self.user_id))
-                                    stringUrl.append("&cast_rank=")
-                                    stringUrl.append(self.strCastRank)
-                                    stringUrl.append("&live_time_count=")
-                                    stringUrl.append(String(self.appDelegate.count))
-                                    stringUrl.append("&star_temp=")
-                                    stringUrl.append("0")//可能であれば入れたいが必須でない
-                                    stringUrl.append("&coin_temp=")
-                                    stringUrl.append("0")//可能であれば入れたいが必須でない
-                                    
-                                    print(stringUrl)
-                                    
-                                    // Swift4からは書き方が変わりました。
-                                    let url = URL(string: stringUrl.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)!)!
-                                    let req = URLRequest(url: url)
-                                    //非同期処理を行う
-                                    let dispatchGroup = DispatchGroup()
-                                    let dispatchQueue = DispatchQueue(label: "queue", attributes: .concurrent)
-                                    dispatchGroup.enter()
-                                    dispatchQueue.async {
-                                        let task = URLSession.shared.dataTask(with: req, completionHandler: {
-                                            (data, res, err) in
-                                            do{
-                                                //ここまでに処理を記述
-                                                dispatchGroup.leave()
-                                            }
-                                        })
-                                        task.resume()
-                                    }
-                                    // 全ての非同期処理完了後にメインスレッドで処理
-                                    dispatchGroup.notify(queue: .main) {
-                                        print("処理が終わった後に実行する処理")
-                                        //延長時にストリーマーが異常終了した場合
-                                        // >コインなどは特に返却しない
-                                        UserDefaults.standard.set(0, forKey: "live_cast_id")
-                                        UserDefaults.standard.set("", forKey: "live_cast_name")
-                                        self.endLiveDo()
-                                    }
-                                }
-                            }else{
-                                //正常終了の場合
-                                //サシライブが終了しましたのメッセージを出力
+                                })
+                                task.resume()
+                            }
+                            // 全ての非同期処理完了後にメインスレッドで処理
+                            dispatchGroup.notify(queue: .main) {
+                                //処理が終わった後に実行する処理
+                                //firebaseのデータをリスナー側でクリア
+                                self.rootRef.child(Util.INIT_FIREBASE
+                                    + "/" + String(self.appDelegate.request_cast_id)).removeValue()
+
                                 UserDefaults.standard.set(0, forKey: "live_cast_id")
                                 UserDefaults.standard.set("", forKey: "live_cast_name")
-                                
+
+                                self.endLiveDo()
+                            }
+                        }else{
+                            //延長時の場合
+                            //自分のuser_idを指定
+                            //let user_id = UserDefaults.standard.integer(forKey: "user_id")
+                            //1:フリー 2:B 3:A 4:Aplus 5:s 6:ss 7:sss
+                            //GET:alert_type, cast_id, user_id, cast_rank, live_time_count, star_temp, coin_temp
+                            var stringUrl = Util.URL_ALERT_RIREKI
+                            stringUrl.append("?alert_type=2&cast_id=")
+                            stringUrl.append(String(self.appDelegate.request_cast_id))
+                            stringUrl.append("&user_id=")
+                            stringUrl.append(String(self.user_id))
+                            stringUrl.append("&cast_rank=")
+                            stringUrl.append(self.strCastRank)
+                            stringUrl.append("&live_time_count=")
+                            stringUrl.append(String(self.appDelegate.count))
+                            stringUrl.append("&star_temp=")
+                            stringUrl.append("0")//可能であれば入れたいが必須でない
+                            stringUrl.append("&coin_temp=")
+                            stringUrl.append("0")//可能であれば入れたいが必須でない
+
+                            print(stringUrl)
+
+                            // Swift4からは書き方が変わりました。
+                            let url = URL(string: stringUrl.addingPercentEncoding(withAllowedCharacters: NSCharacterSet.urlQueryAllowed)!)!
+                            let req = URLRequest(url: url)
+                            //非同期処理を行う
+                            let dispatchGroup = DispatchGroup()
+                            let dispatchQueue = DispatchQueue(label: "queue", attributes: .concurrent)
+                            dispatchGroup.enter()
+                            dispatchQueue.async {
+                                let task = URLSession.shared.dataTask(with: req, completionHandler: {
+                                    (data, res, err) in
+                                    do{
+                                        //ここまでに処理を記述
+                                        dispatchGroup.leave()
+                                    }
+                                })
+                                task.resume()
+                            }
+                            // 全ての非同期処理完了後にメインスレッドで処理
+                            dispatchGroup.notify(queue: .main) {
+                                print("処理が終わった後に実行する処理")
+                                //延長時にストリーマーが異常終了した場合
+                                // >コインなどは特に返却しない
+                                UserDefaults.standard.set(0, forKey: "live_cast_id")
+                                UserDefaults.standard.set("", forKey: "live_cast_name")
                                 self.endLiveDo()
                             }
                         }
+                    }else{
+                        //正常終了の場合
+                        //サシライブが終了しましたのメッセージを出力
+                        UserDefaults.standard.set(0, forKey: "live_cast_id")
+                        UserDefaults.standard.set("", forKey: "live_cast_name")
+
+                        self.endLiveDo()
                     }
                 }
-                //self.changeConnectionStatusUI(connected: false)
             }
-        })
+        }
     }
-    
+
     private func handleDataConnectionOpen() {
         //ライブ中
         //Util.loginDo(user_id:self.user_id, status:2)
@@ -908,43 +877,6 @@ extension MediaConnectionViewController{
         self.messageTableView.reloadData()
     }
 
-    //チャットのコールバック
-    func setupDataConnectionCallbacks(dataConnection:SKWDataConnection){
-        
-        // MARK: DATACONNECTION_EVENT_OPEN
-        //相手につながった時に呼ばれる
-        dataConnection.on(SKWDataConnectionEventEnum.DATACONNECTION_EVENT_OPEN, callback: { (obj) -> Void in
-
-            //if let dataConnection = obj as? SKWDataConnection{
-            if (obj as? SKWDataConnection) != nil{
-                self.handleDataConnectionOpen()
-            }
-        })
-        
-        // MARK: DATACONNECTION_EVENT_DATA
-        //何かメッセージがきた時に呼ばれる（自分からのメッセージは含まない）
-        dataConnection.on(SKWDataConnectionEventEnum.DATACONNECTION_EVENT_DATA, callback: { (obj) -> Void in
-            
-            let strValue:String = obj as! String
-            self.handleReceivedText(strValue)
-        })
-        
-        // MARK: DATACONNECTION_EVENT_CLOSE
-        //相手と切断された時に呼ばれる＞呼ばれる
-        dataConnection.on(SKWDataConnectionEventEnum.DATACONNECTION_EVENT_CLOSE, callback: { (obj) -> Void in
-            print("close data connection")
-            //self.dataConnection = nil>通話の終了処理の方へ移動
-            //self.changeConnectionStatusUI(connected: false)
-            
-            //onda add 2020/11/09
-            //サシライブが終了しましたのメッセージを出力
-            UserDefaults.standard.set(0, forKey: "live_cast_id")
-            UserDefaults.standard.set("", forKey: "live_cast_name")
-            self.endLiveDo()
-            
-        })
-    }
-
     func setupDataConnectionCallbacks() {
         self.handleDataConnectionOpen()
     }
@@ -1104,12 +1036,11 @@ extension MediaConnectionViewController{
      $$$_auto_02:サシライブでは、あなたの映像は映りません。映像が映るのはストリーマーのみです。
      */
     private func sendDataMessage(_ text: String) {
-        if let localDataStream = localDataStream {
-            let data = Data(text.utf8)
-            localDataStream.write(data)
-        } else {
-            self.dataConnection?.send(text as NSObject)
+        guard let localDataStream = localDataStream else {
+            return
         }
+        let data = Data(text.utf8)
+        localDataStream.write(data)
     }
 
     func sendAuto(text: String) {

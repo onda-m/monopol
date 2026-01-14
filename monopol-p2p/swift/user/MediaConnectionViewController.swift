@@ -5,7 +5,6 @@
 //
 
 import UIKit
-import SkyWay
 import SkyWayRoom
 import ReverseExtension
 import Firebase
@@ -222,18 +221,14 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
     
     private var roomTask: Task<Void, Never>?
     private var roomClosed = false
-    var peer: SKWPeer?
-    var mediaConnection: SKWMediaConnection?
-    var dataConnection: SKWDataConnection?
-    var remoteStream: SKWMediaStream?
+    
     
     //チャットやりとりのリストの部分
     @IBOutlet weak var messageTableView: UITableView!
 
     //コールバック用
-    //var dc: SKWDataConnection? = nil
-    @IBOutlet weak var localStreamView: SKWVideo!
-    @IBOutlet weak var remoteStreamView: SKWVideo!
+    @IBOutlet weak var localStreamView: UIView!
+    @IBOutlet weak var remoteStreamView: UIView!
     /*************************************/
     //skyway関連(ここまで)
     /*************************************/
@@ -730,10 +725,6 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
             self.call(targetPeerId: self.liveCastId)
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.mediaConnection!.close()
-        }
-        
         self.send(text: "画面リフレッシュ")
         */
     }
@@ -1043,10 +1034,6 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
             //何もしない
         }else{
             //ライブ配信終了へ
-            //self.mediaConnection?.close()
-            //self.dataConnection?.close()
-            //self.peer?.disconnect()
-            //self.peer?.destroy()
             self.closeMedia()
             self.sessionClose()
         }
