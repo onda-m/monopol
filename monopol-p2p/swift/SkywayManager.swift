@@ -12,6 +12,15 @@ import SkyWayRoom
 
 private var instance: SkywayManager? = nil
 
+protocol SkywaySessionDelegate: AnyObject {
+    func sessionStart()
+    func connectSucces()
+    func remoteConnectSucces()
+    func connectDisconnect()
+    func connectEnd()
+    func connectError()
+}
+
 class SkywayManager: NSObject {
 
     //API Key
@@ -39,12 +48,11 @@ class SkywayManager: NSObject {
     private var peerId: String = ""
     private var connectStart: Bool = false
     private var sessionDelegate: SkywaySessionDelegate?
-    private var roomType: RoomType = .p2p
+    private var roomType: RoomType = .P2P
 
     class func sharedManager() -> SkywayManager {
         if (instance == nil) {
             instance = SkywayManager()
-            instance!.configInit()
         }
         return instance!
     }
