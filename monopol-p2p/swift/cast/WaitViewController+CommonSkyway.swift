@@ -277,9 +277,9 @@ extension WaitViewController{
         localVideoStream = videoStream
         localDataStream = dataStream
 
-        roomPublications.append(try await localMember.publish(audioStream))
-        roomPublications.append(try await localMember.publish(videoStream))
-        roomPublications.append(try await localMember.publish(dataStream))
+        roomPublications.append(try await localMember.publish(audioStream, options: RoomPublicationOptions()))
+        roomPublications.append(try await localMember.publish(videoStream, options: RoomPublicationOptions()))
+        roomPublications.append(try await localMember.publish(dataStream, options: RoomPublicationOptions()))
     }
 
     @MainActor
