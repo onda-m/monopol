@@ -74,7 +74,7 @@ class Util {
             // - 固定トークンを使う場合はこちらを有効化
             // try await SkyWayRoom.Context.setup(withToken: Util.skywayRoomToken, options: nil)
             // - Application ID / Secret Key を使う場合はこちらを有効化
-            try await SkyWayRoom.Context.setup(
+            try await SkyWayRoom.Context.setupForDev(
                 withAppId: Util.skywayApplicationId,
                 secretKey: Util.skywaySecretKey,
                 options: nil
