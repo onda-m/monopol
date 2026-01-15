@@ -153,7 +153,7 @@ class SkywayManager: NSObject {
 
     @MainActor
     private func attachRoomCallbacks(room: Room, localMember: LocalRoomMember) {
-        room.onStreamPublished { [weak self] publication in
+        room.onPublicationPublished { [weak self] (publication: RoomPublication) in
             guard let self = self else { return }
             if publication.publisher.id == localMember.id {
                 return
@@ -163,7 +163,7 @@ class SkywayManager: NSObject {
             }
         }
 
-        room.onMemberLeft { [weak self] member in
+        room.onMemberLeft { [weak self] (member: RoomMember) in
             guard let self = self else { return }
             if member.id != localMember.id {
                 self.sessionDelegate?.connectDisconnect()
@@ -175,13 +175,13 @@ class SkywayManager: NSObject {
     private func publishLocalStreams(localMember: LocalRoomMember) async throws {
         await prepareLocalStreamsIfNeeded()
         if let localAudioStream = localAudioStream {
-            roomPublications.append(try await localMember.publish(localAudioStream))
+            roomPublications.append(try await localMember.publish(localAudioStream, options: RoomPublicationOptions()))
         }
         if let localVideoStream = localVideoStream {
-            roomPublications.append(try await localMember.publish(localVideoStream))
+            roomPublications.append(try await localMember.publish(localVideoStream, options: RoomPublicationOptions()))
         }
         if let localDataStream = localDataStream {
-            roomPublications.append(try await localMember.publish(localDataStream))
+            roomPublications.append(try await localMember.publish(localDataStream, options: RoomPublicationOptions()))
         }
     }
 
@@ -201,7 +201,7 @@ class SkywayManager: NSObject {
     @MainActor
     private func subscribeToPublication(_ publication: RoomPublication, localMember: LocalRoomMember) async {
         do {
-            let subscription = try await localMember.subscribe(publicationId: publication.id, options: nil)
+            let subscription = try await localMember.subscribe(publicationId: publication.id, options: SubscriptionOptions())
             roomSubscriptions.append(subscription)
             if let stream = subscription.stream as? RemoteVideoStream {
                 remoteVideoStream = stream
