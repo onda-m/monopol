@@ -48,7 +48,7 @@ class SkywayManager: NSObject {
     private var peerId: String = ""
     private var connectStart: Bool = false
     private var sessionDelegate: SkywaySessionDelegate?
-    private var roomType: RoomType = .P2P
+    //private var roomType: RoomType = .P2P
 
     class func sharedManager() -> SkywayManager {
         if (instance == nil) {
@@ -105,14 +105,9 @@ class SkywayManager: NSObject {
         roomClosed = true
         roomTask?.cancel()
         roomTask = nil
-        roomSubscriptions.forEach { subscription in
-            subscription.cancel()
+        Task { @MainActor in
+            await cleanupRoomResources()
         }
-        roomSubscriptions.removeAll()
-        roomPublications.forEach { publication in
-            publication.cancel()
-        }
-        roomPublications.removeAll()
         localDataStream = nil
         localAudioStream = nil
         localVideoStream = nil
@@ -140,9 +135,13 @@ class SkywayManager: NSObject {
         guard roomClosed == false else { return }
         do {
             try await Util.setupSkyWayRoomContextIfNeeded()
-            let room = try await Room.findOrCreate(withName: roomName, type: roomType)
+            let roomOptions = Room.InitOptions()
+            roomOptions.name = roomName
+            let room = try await Room.findOrCreate(with: roomOptions)
             self.room = room
-            let localMember = try await room.join(withName: memberName)
+            let memberOptions = Room.MemberInitOptions()
+            memberOptions.name = memberName
+            let localMember = try await room.join(with: memberOptions)
             self.localMember = localMember
             attachRoomCallbacks(room: room, localMember: localMember)
             try await publishLocalStreams(localMember: localMember)
@@ -202,7 +201,7 @@ class SkywayManager: NSObject {
     @MainActor
     private func subscribeToPublication(_ publication: RoomPublication, localMember: LocalRoomMember) async {
         do {
-            let subscription = try await localMember.subscribe(publication)
+            let subscription = try await localMember.subscribe(publicationId: publication.id, options: nil)
             roomSubscriptions.append(subscription)
             if let stream = subscription.stream as? RemoteVideoStream {
                 remoteVideoStream = stream
@@ -226,6 +225,23 @@ class SkywayManager: NSObject {
         room = nil
         localMember = nil
         roomClosed = true
+    }
+
+    @MainActor
+    private func cleanupRoomResources() async {
+        guard let localMember = localMember else {
+            roomSubscriptions.removeAll()
+            roomPublications.removeAll()
+            return
+        }
+        for subscription in roomSubscriptions {
+            try? await localMember.unsubscribe(subscriptionId: subscription.id)
+        }
+        roomSubscriptions.removeAll()
+        for publication in roomPublications {
+            try? await localMember.unpublish(publication.id)
+        }
+        roomPublications.removeAll()
     }
 
     private func attachLocalVideo() {
