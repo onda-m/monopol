@@ -1402,7 +1402,10 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     //待機状態にするための共通処理
     //statusには１(予約なし)か８(予約あり)が入る
     //予約は廃止
-        self.sessionClose()
+    func commonWaitDo(status:Int){
+        //待機状態へ
+        //くるくる表示開始
+        if(self.busyIndicator.isDescendant(of: self.view)){
             //すでに追加(addsubview)済み
             //画面サイズに合わせる
             self.busyIndicator.frame = self.view.frame
@@ -1425,10 +1428,11 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
 
         //正常状態(人的操作によるもの)にする
         self.listenerErrorFlg = 1
-        self.mediaConnection?.close()
-        self.dataConnection?.close()
-        self.peer!.disconnect()
-        self.peer!.destroy()
+        //self.mediaConnection?.close()
+        //self.dataConnection?.close()
+        //self.peer!.disconnect()
+        //self.peer!.destroy()
+        self.sessionClose()
 
         //非表示
         self.userInfoDialog.isHidden = true
