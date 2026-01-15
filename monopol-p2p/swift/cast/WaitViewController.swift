@@ -394,13 +394,13 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         self.countDownLabel.layer.masksToBounds = true
         
         //機能廃止
-        //※お知らせ 必要に応じて以下のようなメッセージを流す(2行か3行) 各メッセージは5秒ほどで消える
-        //・ランクがアップしました(R47)
-        //・2枠目をやじさんが予約しました
-        //・1枠目終了まであと1分
-        //・1枠目終了まであと30秒
-        //・1枠目終了まであと15秒
-        //・まつさんからスクショリクエストがありました
+        //※お知らせ 必要に応じて以下のようなメッセージを流す(2行か3行) 各メッセージは5秒ほどで消える
+        //・ランクがアップしました(R47)
+        //・2枠目をやじさんが予約しました
+        //・1枠目終了まであと1分
+        //・1枠目終了まであと30秒
+        //・1枠目終了まであと15秒
+        //・まつさんからスクショリクエストがありました
         //・まつさんにスクショを送りました
         // 角丸
         self.oshiraseView.layer.cornerRadius = 8
@@ -865,9 +865,9 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
                         
                         self.commonWaitDo(status:1)
                     }
-        let rect = videoContainerView.bounds
-        videoContainerView.layer.render(in: context)
-        self.localVideoStream?.setEnabled(false)
+                }
+            }
+        }else{
             //復帰できなくなった場合
             //待機中の時の非表示・表示
             //各オブジェクトの表示（常に表示しておきたいので、念のため、ここでも必要。）
@@ -1129,8 +1129,8 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         //print("タップ")
         //ツールバーを表示する(念のため)
         myTabBar.isHidden = true
-            self.localVideoStream?.setEnabled(true)
-            self.localVideoStream?.setEnabled(true)
+        captureToolbar.isHidden = false
+        self.view.bringSubviewToFront(captureToolbar)
 
         takeStillPicture()
     }
@@ -1235,37 +1235,43 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             //待機状態の時は「送信」でなく「保存」
             //写真ダイアログを表示
             let castPhotoDialog:CastScreenshotDialog = UINib(nibName: "CastScreenshotDialog", bundle: nil).instantiate(withOwner: self,options: nil)[0] as! CastScreenshotDialog
-                return
-            }
+            //画面サイズに合わせる
+            castPhotoDialog.frame = self.view.frame
+            
+            // 貼り付ける
+            self.view.addSubview(castPhotoDialog)
+        }
+    }
 
-            guard let dict = snap.value as? [String: Any] else {
-                return
-            }
-            if(dict["user_id"] == nil || dict["cast_id"] == nil){
-                //いったんFireBaseのデータを削除する
-                //self.rootRef.child(Util.INIT_FIREBASE + "/" + String(self.user_id)).removeValue()
+    //フォアグラウンドなどではなく、この画面に遷移したときにだけ実行される。（1度のみ実行）
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        // 子ノード condition への参照
+        self.castWaitConditionRef = self.rootRef.child(Util.INIT_FIREBASE + "/"
+            + String(self.user_id))
+        // クラウド上で、ノード Util.INIT_FIREBASE に変更があった場合のコールバック処理
+        self.request_handler = self.castWaitConditionRef.observe(.value) { (snap: DataSnapshot) in
+            //self.conditionRef.removeObserver(withHandle: handler)
+
+            if(snap.exists() == false){
+                //UtilLog.printf(str:"すでにデータがない(ストリーマー側)")
+                
+                //全て非表示
+                self.castWaitDialog.allCoverMessage.isHidden = true
+                self.castWaitDialog.allCoverRequest.isHidden = true
+                self.castWaitDialog.topInfoLabel.isHidden = true
+
                 return
             }
             
-            self.castWaitDialog.get_user_id  = dict["user_id"] as! Int
-            self.castWaitDialog.get_cast_id  = dict["cast_id"] as! Int
-            //status = 1:申請中 2:申請したけど拒否された 3:申請が取り消された 99:接続が承認された
-            self.castWaitDialog.status  = dict["status"] as! Int
-            
-            if(self.user_id == self.castWaitDialog.get_cast_id && self.castWaitDialog.status == 1){
-                //自分への通常リクエストの場合
-                self.castWaitDialog.get_user_name  = dict["user_name"] as? String
-                self.castWaitDialog.get_user_photo_flg = dict["user_photo_flg"] as! Int
-                self.castWaitDialog.get_user_photo_name = dict["user_photo_name"] as? String
-
-                UtilFunc.isPeerIdExist(peer: self.peer!, peerId: String(self.user_id)){ (flg) in
-                    if(flg == false){
-                        //接続されていない場合(バックグラウンドにある場合)
-                        //ここでは何もしない＞処理は、WaitViewController+CommonSkywayの待機完了後に行う。
-                    }else{
-                    if self.isWaitingRoomConnected() {
-                        //フォアグラウンドにある場合
-                        self.castWaitDialog.requestDialogDo()
+            for item in (snap.children) {
+                // 中身の取り出し
+                let snapshot = item as! DataSnapshot
+                let dict = snapshot.value as! [String: Any]
+                print(dict)
+                //print(dict["user_id"] as Any)
+                //print(dict["cast_id"] as Any)
                 
                 if(dict["user_id"] == nil || dict["cast_id"] == nil){
                     //いったんFireBaseのデータを削除する
