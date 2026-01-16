@@ -62,8 +62,8 @@ extension MediaConnectionViewController{
                 localStreamView.addSubview(localVideoView)
             }
         }
-        if let localVideoStream = localVideoStream, let localVideoView = localVideoView {
-            localVideoStream.addRenderer(localVideoView)
+        if localVideoStream != nil, let localVideoView = localVideoView {
+            cameraVideoSource?.attach(localVideoView)
         }
     }
 
@@ -76,18 +76,16 @@ extension MediaConnectionViewController{
             }
         }
         if let remoteVideoStream = remoteVideoStream, let remoteVideoView = remoteVideoView {
-            remoteVideoStream.addRenderer(remoteVideoView)
+            remoteVideoStream.attach(remoteVideoView)
         }
     }
 
     func detachLocalVideo() {
-        localVideoStream?.removeRenderer(localVideoView)
         localVideoView?.removeFromSuperview()
         localVideoView = nil
     }
 
     func detachRemoteVideo() {
-        remoteVideoStream?.removeRenderer(remoteVideoView)
         remoteVideoView?.removeFromSuperview()
         remoteVideoView = nil
     }
@@ -284,7 +282,7 @@ extension MediaConnectionViewController{
     @MainActor
     private func leaveRoomIfNeeded() async {
         if let localMember = localMember {
-            await localMember.leave()
+            try? await localMember.leave()
         }
         room = nil
         localMember = nil
@@ -294,7 +292,7 @@ extension MediaConnectionViewController{
     @MainActor
     private func leaveWaitRoomIfNeeded() async {
         if let waitLocalMember = waitLocalMember {
-            await waitLocalMember.leave()
+            try? await waitLocalMember.leave()
         }
         waitRoom = nil
         waitLocalMember = nil
