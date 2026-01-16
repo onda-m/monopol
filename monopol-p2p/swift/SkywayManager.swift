@@ -161,7 +161,7 @@ class SkywayManager: NSObject {
     @MainActor
     private func attachRoomCallbacks(room: Room, localMember: LocalRoomMember) {
         let localMemberId = localMemberIdentifier(localMember)
-        room.onPublicationPublishedHandler = { [weak self] (publication: RoomPublication) in
+        room.publications.forEach { [weak self] (publication: RoomPublication) in
             guard let self = self else { return }
             if publicationPublisherIdentifier(publication) == localMemberId {
                 return
@@ -171,7 +171,7 @@ class SkywayManager: NSObject {
             }
         }
 
-        room.onMemberLeftHandler = { [weak self] (member: RoomMember) in
+        room.members.forEach { [weak self] (member: RoomMember) in
             guard let self = self else { return }
             if memberIdentifier(member) != localMemberId {
                 self.sessionDelegate?.connectDisconnect()
