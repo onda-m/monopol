@@ -134,6 +134,7 @@ extension WaitViewController{
         localDataStream = nil
         localAudioStream = nil
         localVideoStream = nil
+        SkywayManager.sharedManager().registerLocalVideoStream(nil)
         remoteVideoStream = nil
         remoteAudioStream = nil
         remoteDataStream = nil
@@ -276,6 +277,7 @@ extension WaitViewController{
         localAudioStream = audioStream
         localVideoStream = videoStream
         localDataStream = dataStream
+        SkywayManager.sharedManager().registerLocalVideoStream(videoStream)
 
         roomPublications.append(try await localMember.publish(audioStream, options: RoomPublicationOptions()))
         roomPublications.append(try await localMember.publish(videoStream, options: RoomPublicationOptions()))

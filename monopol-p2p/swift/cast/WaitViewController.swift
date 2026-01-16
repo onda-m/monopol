@@ -886,7 +886,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
             self.castWaitDialog.delMessageDo()
         }
     }
-
+        SkywayManager.sharedManager().setLocalVideoEnabled(false)
     /*
     //未使用
     func GetImage() -> UIImage{
@@ -1129,8 +1129,8 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
         //print("タップ")
         //ツールバーを表示する(念のため)
         myTabBar.isHidden = true
-        captureToolbar.isHidden = false
-        self.view.bringSubviewToFront(captureToolbar)
+            SkywayManager.sharedManager().setLocalVideoEnabled(true)
+            SkywayManager.sharedManager().setLocalVideoEnabled(true)
 
         takeStillPicture()
     }

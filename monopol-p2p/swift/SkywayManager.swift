@@ -125,6 +125,14 @@ class SkywayManager: NSObject {
         }
     }
 
+    public func registerLocalVideoStream(_ stream: LocalVideoStream?) {
+        localVideoStream = stream
+    }
+
+    public func setLocalVideoEnabled(_ enabled: Bool) {
+        localVideoStream?.setIsEnabled(enabled)
+    }
+
     func setRemoteView(remoteView: UIView) {
         remoteContainerView = remoteView
         attachRemoteVideo()
