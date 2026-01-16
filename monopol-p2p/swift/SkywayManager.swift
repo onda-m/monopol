@@ -160,9 +160,10 @@ class SkywayManager: NSObject {
 
     @MainActor
     private func attachRoomCallbacks(room: Room, localMember: LocalRoomMember) {
-        room.onStreamPublished { [weak self] (publication: RoomPublication) in
+        let localMemberId = localMemberIdentifier(localMember)
+        room.publications.forEach { [weak self] (publication: RoomPublication) in
             guard let self = self else { return }
-            if publication.publisher.id == localMember.id {
+            if publicationPublisherIdentifier(publication) == localMemberId {
                 return
             }
             Task { @MainActor in
@@ -170,14 +171,24 @@ class SkywayManager: NSObject {
             }
         }
 
-        if let p2pRoom = room as? P2PRoom {
-            p2pRoom.onMemberLeft { [weak self] (member: RoomMember) in
-                guard let self = self else { return }
-                if member.id != localMember.id {
-                    self.sessionDelegate?.connectDisconnect()
-                }
+        room.members.forEach { [weak self] (member: RoomMember) in
+            guard let self = self else { return }
+            if memberIdentifier(member) != localMemberId {
+                self.sessionDelegate?.connectDisconnect()
             }
         }
+    }
+
+    private func localMemberIdentifier(_ member: LocalRoomMember) -> String {
+        member.id
+    }
+
+    private func memberIdentifier(_ member: RoomMember) -> String {
+        member.id
+    }
+
+    private func publicationPublisherIdentifier(_ publication: RoomPublication) -> String? {
+        publication.publisher?.id
     }
 
     @MainActor
