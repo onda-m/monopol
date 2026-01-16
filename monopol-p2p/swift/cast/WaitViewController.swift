@@ -104,6 +104,10 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     var localVideoStream: LocalVideoStream?
     var localAudioStream: LocalAudioStream?
     var localDataStream: LocalDataStream?
+    var microphoneAudioSource: MicrophoneAudioSource?
+    var cameraVideoSource: CameraVideoSource?
+    var dataSource: DataSource?
+    var cameraDevice: CameraVideoSource.Camera?
     var remoteVideoStream: RemoteVideoStream?
     var remoteAudioStream: RemoteAudioStream?
     var remoteDataStream: RemoteDataStream?

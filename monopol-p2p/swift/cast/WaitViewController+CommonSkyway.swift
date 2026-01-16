@@ -284,17 +284,49 @@ extension WaitViewController{
 
     @MainActor
     private func publishLocalStreams(localMember: LocalRoomMember) async throws {
-        let audioStream = try await LocalAudioStream.create()
-        let videoStream = try await LocalVideoStream.create()
-        let dataStream = LocalDataStream()
-        localAudioStream = audioStream
-        localVideoStream = videoStream
-        localDataStream = dataStream
-        SkywayManager.sharedManager().registerLocalVideoStream(videoStream)
+        try await prepareLocalStreamsIfNeeded()
+        if let localVideoStream = localVideoStream {
+            SkywayManager.sharedManager().registerLocalVideoStream(localVideoStream)
+        }
 
-        roomPublications.append(try await localMember.publish(audioStream, options: RoomPublicationOptions()))
-        roomPublications.append(try await localMember.publish(videoStream, options: RoomPublicationOptions()))
-        roomPublications.append(try await localMember.publish(dataStream, options: RoomPublicationOptions()))
+        if let localAudioStream = localAudioStream {
+            roomPublications.append(try await localMember.publish(localAudioStream, options: RoomPublicationOptions()))
+        }
+        if let localVideoStream = localVideoStream {
+            roomPublications.append(try await localMember.publish(localVideoStream, options: RoomPublicationOptions()))
+        }
+        if let localDataStream = localDataStream {
+            roomPublications.append(try await localMember.publish(localDataStream, options: RoomPublicationOptions()))
+        }
+    }
+
+    @MainActor
+    private func prepareLocalStreamsIfNeeded() async throws {
+        if localAudioStream == nil {
+            if microphoneAudioSource == nil {
+                microphoneAudioSource = MicrophoneAudioSource()
+            }
+            localAudioStream = microphoneAudioSource?.createStream()
+        }
+
+        if localVideoStream == nil {
+            let cameraVideoSource = cameraVideoSource ?? CameraVideoSource.shared()
+            self.cameraVideoSource = cameraVideoSource
+            if cameraDevice == nil {
+                cameraDevice = CameraVideoSource.supportedCameras().first(where: { $0.position == .front })
+            }
+            if let cameraDevice = cameraDevice {
+                try await cameraVideoSource.startCapturing(with: cameraDevice, options: nil)
+                localVideoStream = cameraVideoSource.createStream()
+            }
+        }
+
+        if localDataStream == nil {
+            if dataSource == nil {
+                dataSource = DataSource()
+            }
+            localDataStream = dataSource?.createStream()
+        }
     }
 
     @MainActor

@@ -36,6 +36,10 @@ class SkywayManager: NSObject {
     private var localVideoStream: LocalVideoStream?
     private var localAudioStream: LocalAudioStream?
     private var localDataStream: LocalDataStream?
+    private var microphoneAudioSource: MicrophoneAudioSource?
+    private var cameraVideoSource: CameraVideoSource?
+    private var dataSource: DataSource?
+    private var cameraDevice: CameraVideoSource.Camera?
     private var remoteVideoStream: RemoteVideoStream?
     private var remoteAudioStream: RemoteAudioStream?
     private var remoteDataStream: RemoteDataStream?
@@ -111,6 +115,10 @@ class SkywayManager: NSObject {
         localDataStream = nil
         localAudioStream = nil
         localVideoStream = nil
+        microphoneAudioSource = nil
+        cameraVideoSource = nil
+        dataSource = nil
+        cameraDevice = nil
         remoteVideoStream = nil
         remoteAudioStream = nil
         remoteDataStream = nil
@@ -208,13 +216,27 @@ class SkywayManager: NSObject {
     @MainActor
     private func prepareLocalStreamsIfNeeded() async {
         if localAudioStream == nil {
-            localAudioStream = try? await LocalAudioStream.create()
+            if microphoneAudioSource == nil {
+                microphoneAudioSource = MicrophoneAudioSource()
+            }
+            localAudioStream = microphoneAudioSource?.createStream()
         }
         if localVideoStream == nil {
-            localVideoStream = try? await LocalVideoStream.create()
+            let cameraVideoSource = cameraVideoSource ?? CameraVideoSource.shared()
+            self.cameraVideoSource = cameraVideoSource
+            if cameraDevice == nil {
+                cameraDevice = CameraVideoSource.supportedCameras().first(where: { $0.position == .front })
+            }
+            if let cameraDevice = cameraDevice {
+                try? await cameraVideoSource.startCapturing(with: cameraDevice, options: nil)
+                localVideoStream = cameraVideoSource.createStream()
+            }
         }
         if localDataStream == nil {
-            localDataStream = LocalDataStream()
+            if dataSource == nil {
+                dataSource = DataSource()
+            }
+            localDataStream = dataSource?.createStream()
         }
     }
 
