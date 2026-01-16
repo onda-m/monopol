@@ -39,7 +39,6 @@ class SkywayManager: NSObject {
     private var microphoneAudioSource: MicrophoneAudioSource?
     private var cameraVideoSource: CameraVideoSource?
     private var dataSource: DataSource?
-    private var cameraDevice: CameraVideoSource.Camera?
     private var remoteVideoStream: RemoteVideoStream?
     private var remoteAudioStream: RemoteAudioStream?
     private var remoteDataStream: RemoteDataStream?
@@ -118,7 +117,6 @@ class SkywayManager: NSObject {
         microphoneAudioSource = nil
         cameraVideoSource = nil
         dataSource = nil
-        cameraDevice = nil
         remoteVideoStream = nil
         remoteAudioStream = nil
         remoteDataStream = nil
@@ -224,9 +222,7 @@ class SkywayManager: NSObject {
         if localVideoStream == nil {
             let cameraVideoSource = cameraVideoSource ?? CameraVideoSource.shared()
             self.cameraVideoSource = cameraVideoSource
-            if cameraDevice == nil {
-                cameraDevice = CameraVideoSource.supportedCameras().first(where: { $0.position == .front })
-            }
+            let cameraDevice = CameraVideoSource.supportedCameras().first(where: { $0.position == .front })
             if let cameraDevice = cameraDevice {
                 try? await cameraVideoSource.startCapturing(with: cameraDevice, options: nil)
                 localVideoStream = cameraVideoSource.createStream()
