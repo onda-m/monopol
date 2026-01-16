@@ -140,6 +140,7 @@ extension MediaConnectionViewController{
 
     @MainActor
     private func attachRoomCallbacks(room: Room, localMember: LocalRoomMember) {
+        let localMemberId = localMemberIdentifier(localMember)
         room.onMemberJoined { [weak self] _ in
             guard let self = self else { return }
             if room.members.count > 2 {
@@ -149,9 +150,9 @@ extension MediaConnectionViewController{
             }
         }
 
-        room.onStreamPublished { [weak self] publication in
+        room.onPublicationPublished { [weak self] publication in
             guard let self = self else { return }
-            if publication.publisher.id == localMember.id {
+            if publicationPublisherIdentifier(publication) == localMemberId {
                 return
             }
             Task { @MainActor in
@@ -161,10 +162,22 @@ extension MediaConnectionViewController{
 
         room.onMemberLeft { [weak self] member in
             guard let self = self else { return }
-            if member.id != localMember.id {
+            if memberIdentifier(member) != localMemberId {
                 self.handleRemoteMediaDisconnected()
             }
         }
+    }
+
+    private func localMemberIdentifier(_ member: LocalRoomMember) -> String {
+        member.id
+    }
+
+    private func memberIdentifier(_ member: RoomMember) -> String {
+        member.id
+    }
+
+    private func publicationPublisherIdentifier(_ publication: RoomPublication) -> String? {
+        publication.publisher?.id
     }
 
     @MainActor
