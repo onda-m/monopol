@@ -361,7 +361,7 @@ extension WaitViewController{
     @MainActor
     private func leaveRoomIfNeeded() async {
         if let localMember = localMember {
-            await localMember.leave()
+            try? await localMember.leave()
         }
         room = nil
         localMember = nil
@@ -371,7 +371,7 @@ extension WaitViewController{
     @MainActor
     private func leaveWaitRoomIfNeeded() async {
         if let waitLocalMember = waitLocalMember {
-            await waitLocalMember.leave()
+            try? await waitLocalMember.leave()
         }
         waitRoom = nil
         waitLocalMember = nil
@@ -387,18 +387,16 @@ extension WaitViewController{
             }
         }
         if let remoteVideoStream = remoteVideoStream, let remoteVideoView = remoteVideoView {
-            remoteVideoStream.addRenderer(remoteVideoView)
+            remoteVideoStream.attach(remoteVideoView)
         }
     }
 
     func detachLocalVideo() {
-        localVideoStream?.removeRenderer(localVideoView)
         localVideoView?.removeFromSuperview()
         localVideoView = nil
     }
 
     func detachRemoteVideo() {
-        remoteVideoStream?.removeRenderer(remoteVideoView)
         remoteVideoView?.removeFromSuperview()
         remoteVideoView = nil
     }

@@ -258,7 +258,7 @@ class SkywayManager: NSObject {
     @MainActor
     private func leaveRoomIfNeeded() async {
         if let localMember = localMember {
-            await localMember.leave()
+            try? await localMember.leave()
         }
         room = nil
         localMember = nil
@@ -291,8 +291,8 @@ class SkywayManager: NSObject {
                 localContainerView.addSubview(localVideoView)
             }
         }
-        if let localVideoStream = localVideoStream, let localVideoView = localVideoView {
-            localVideoStream.addRenderer(localVideoView)
+        if localVideoStream != nil, let localVideoView = localVideoView {
+            cameraVideoSource?.attach(localVideoView)
         }
     }
 
@@ -306,22 +306,16 @@ class SkywayManager: NSObject {
             }
         }
         if let remoteVideoStream = remoteVideoStream, let remoteVideoView = remoteVideoView {
-            remoteVideoStream.addRenderer(remoteVideoView)
+            remoteVideoStream.attach(remoteVideoView)
         }
     }
 
     private func detachLocalVideo() {
-        if let localVideoView = localVideoView {
-            localVideoStream?.removeRenderer(localVideoView)
-        }
         localVideoView?.removeFromSuperview()
         localVideoView = nil
     }
 
     private func detachRemoteVideo() {
-        if let remoteVideoView = remoteVideoView {
-            remoteVideoStream?.removeRenderer(remoteVideoView)
-        }
         remoteVideoView?.removeFromSuperview()
         remoteVideoView = nil
     }
