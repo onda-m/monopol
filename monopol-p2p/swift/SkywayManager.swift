@@ -148,9 +148,7 @@ class SkywayManager: NSObject {
             roomOptions.type = .p2p
             let room = try await Room.findOrCreate(with: roomOptions)
             self.room = room
-            let memberOptions = Room.MemberInitOptions()
-            memberOptions.name = memberName
-            let localMember = try await room.join(with: memberOptions)
+            let localMember = try await room.join(withName: memberName)
             self.localMember = localMember
             attachRoomCallbacks(room: room, localMember: localMember)
             try await publishLocalStreams(localMember: localMember)
@@ -212,7 +210,7 @@ class SkywayManager: NSObject {
     @MainActor
     private func subscribeToPublication(_ publication: RoomPublication, localMember: LocalRoomMember) async {
         do {
-            let subscription = try await localMember.subscribe(publicationId: publication.id, options: SubscriptionOptions())
+            let subscription = try await localMember.subscribe(publication)
             roomSubscriptions.append(subscription)
             if let stream = subscription.stream as? RemoteVideoStream {
                 remoteVideoStream = stream
