@@ -130,7 +130,7 @@ class SkywayManager: NSObject {
     }
 
     public func setLocalVideoEnabled(_ enabled: Bool) {
-        localVideoStream?.isEnabled = enabled
+        localVideoStream?.enabled = enabled
     }
 
     func setRemoteView(remoteView: UIView) {
@@ -143,7 +143,10 @@ class SkywayManager: NSObject {
         guard roomClosed == false else { return }
         do {
             try await Util.setupSkyWayRoomContextIfNeeded()
-            let room = try await Room.findOrCreate(withName: roomName, type: .p2p)
+            let roomOptions = Room.InitOptions()
+            roomOptions.name = roomName
+            roomOptions.type = .p2p
+            let room = try await Room.findOrCreate(with: roomOptions)
             self.room = room
             let localMember = try await room.join(withName: memberName)
             self.localMember = localMember
@@ -167,10 +170,12 @@ class SkywayManager: NSObject {
             }
         }
 
-        room.onMemberLeft { [weak self] (member: RoomMember) in
-            guard let self = self else { return }
-            if member.id != localMember.id {
-                self.sessionDelegate?.connectDisconnect()
+        if let p2pRoom = room as? P2PRoom {
+            p2pRoom.onMemberLeft { [weak self] (member: RoomMember) in
+                guard let self = self else { return }
+                if member.id != localMember.id {
+                    self.sessionDelegate?.connectDisconnect()
+                }
             }
         }
     }
