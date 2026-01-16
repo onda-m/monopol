@@ -202,10 +202,15 @@ extension WaitViewController{
 
         do {
             try await Util.setupSkyWayRoomContextIfNeeded()
-            let room = try await Room.findOrCreate(withName: roomName, type: .p2p)
+            let roomOptions = Room.InitOptions()
+            roomOptions.name = roomName
+            roomOptions.type = .p2p
+            let room = try await Room.findOrCreate(with: roomOptions)
             self.room = room
 
-            let localMember = try await room.join(withName: memberName)
+            let memberOptions = Room.MemberInitOptions()
+            memberOptions.name = memberName
+            let localMember = try await room.join(with: memberOptions)
             self.localMember = localMember
 
             if room.members.count > 2 {
@@ -226,10 +231,15 @@ extension WaitViewController{
 
         do {
             try await Util.setupSkyWayRoomContextIfNeeded()
-            let waitRoom = try await Room.findOrCreate(withName: roomName, type: .sfu)
+            let waitRoomOptions = Room.InitOptions()
+            waitRoomOptions.name = roomName
+            waitRoomOptions.type = .sfu
+            let waitRoom = try await Room.findOrCreate(with: waitRoomOptions)
             self.waitRoom = waitRoom
 
-            let waitLocalMember = try await waitRoom.join(withName: memberName)
+            let waitMemberOptions = Room.MemberInitOptions()
+            waitMemberOptions.name = memberName
+            let waitLocalMember = try await waitRoom.join(with: waitMemberOptions)
             self.waitLocalMember = waitLocalMember
         } catch {
             print("SkyWayRoom wait room join error: \(error)")
@@ -332,7 +342,7 @@ extension WaitViewController{
     @MainActor
     private func subscribeToPublication(_ publication: RoomPublication, localMember: LocalRoomMember) async {
         do {
-            let subscription = try await localMember.subscribe(publication)
+            let subscription = try await localMember.subscribe(publicationId: publication.id, options: nil)
             roomSubscriptions.append(subscription)
             if let stream = subscription.stream as? RemoteVideoStream {
                 remoteVideoStream = stream

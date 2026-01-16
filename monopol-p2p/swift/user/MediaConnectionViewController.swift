@@ -210,7 +210,7 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
     private var remoteVideoStream: RemoteVideoStream?
     private var remoteAudioStream: RemoteAudioStream?
     private var remoteDataStream: RemoteDataStream?
-    private var localVideoView: VideoView?
+    private var localVideoView: CameraPreviewView?
     private var remoteVideoView: VideoView?
 
     var messages = [Message]()
