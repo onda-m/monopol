@@ -130,7 +130,7 @@ class SkywayManager: NSObject {
     }
 
     public func setLocalVideoEnabled(_ enabled: Bool) {
-        localVideoStream?.setIsEnabled(enabled)
+        localVideoStream?.isEnabled = enabled
     }
 
     func setRemoteView(remoteView: UIView) {
@@ -143,13 +143,9 @@ class SkywayManager: NSObject {
         guard roomClosed == false else { return }
         do {
             try await Util.setupSkyWayRoomContextIfNeeded()
-            let roomOptions = Room.InitOptions()
-            roomOptions.name = roomName
-            let room = try await Room.findOrCreate(with: roomOptions)
+            let room = try await Room.findOrCreate(withName: roomName, type: .p2p)
             self.room = room
-            let memberOptions = Room.MemberInitOptions()
-            memberOptions.name = memberName
-            let localMember = try await room.join(with: memberOptions)
+            let localMember = try await room.join(withName: memberName)
             self.localMember = localMember
             attachRoomCallbacks(room: room, localMember: localMember)
             try await publishLocalStreams(localMember: localMember)
@@ -161,7 +157,7 @@ class SkywayManager: NSObject {
 
     @MainActor
     private func attachRoomCallbacks(room: Room, localMember: LocalRoomMember) {
-        room.onPublicationPublished { [weak self] (publication: RoomPublication) in
+        room.onStreamPublished { [weak self] (publication: RoomPublication) in
             guard let self = self else { return }
             if publication.publisher.id == localMember.id {
                 return
@@ -209,7 +205,7 @@ class SkywayManager: NSObject {
     @MainActor
     private func subscribeToPublication(_ publication: RoomPublication, localMember: LocalRoomMember) async {
         do {
-            let subscription = try await localMember.subscribe(publicationId: publication.id, options: SubscriptionOptions())
+            let subscription = try await localMember.subscribe(publication)
             roomSubscriptions.append(subscription)
             if let stream = subscription.stream as? RemoteVideoStream {
                 remoteVideoStream = stream
@@ -262,7 +258,7 @@ class SkywayManager: NSObject {
             }
         }
         if let localVideoStream = localVideoStream, let localVideoView = localVideoView {
-            localVideoStream.attach(localVideoView)
+            localVideoStream.addRenderer(localVideoView)
         }
     }
 
@@ -276,13 +272,13 @@ class SkywayManager: NSObject {
             }
         }
         if let remoteVideoStream = remoteVideoStream, let remoteVideoView = remoteVideoView {
-            remoteVideoStream.attach(remoteVideoView)
+            remoteVideoStream.addRenderer(remoteVideoView)
         }
     }
 
     private func detachLocalVideo() {
         if let localVideoView = localVideoView {
-            localVideoStream?.detach(localVideoView)
+            localVideoStream?.removeRenderer(localVideoView)
         }
         localVideoView?.removeFromSuperview()
         localVideoView = nil
@@ -290,7 +286,7 @@ class SkywayManager: NSObject {
 
     private func detachRemoteVideo() {
         if let remoteVideoView = remoteVideoView {
-            remoteVideoStream?.detach(remoteVideoView)
+            remoteVideoStream?.removeRenderer(remoteVideoView)
         }
         remoteVideoView?.removeFromSuperview()
         remoteVideoView = nil
