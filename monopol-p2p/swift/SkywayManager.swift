@@ -254,7 +254,7 @@ class SkywayManager: NSObject {
             }
         }
         if let localVideoStream = localVideoStream, let localVideoView = localVideoView {
-            localVideoStream.addRenderer(localVideoView)
+            localVideoStream.attach(localVideoView)
         }
     }
 
@@ -268,18 +268,22 @@ class SkywayManager: NSObject {
             }
         }
         if let remoteVideoStream = remoteVideoStream, let remoteVideoView = remoteVideoView {
-            remoteVideoStream.addRenderer(remoteVideoView)
+            remoteVideoStream.attach(remoteVideoView)
         }
     }
 
     private func detachLocalVideo() {
-        localVideoStream?.removeRenderer(localVideoView)
+        if let localVideoView = localVideoView {
+            localVideoStream?.detach(localVideoView)
+        }
         localVideoView?.removeFromSuperview()
         localVideoView = nil
     }
 
     private func detachRemoteVideo() {
-        remoteVideoStream?.removeRenderer(remoteVideoView)
+        if let remoteVideoView = remoteVideoView {
+            remoteVideoStream?.detach(remoteVideoView)
+        }
         remoteVideoView?.removeFromSuperview()
         remoteVideoView = nil
     }
