@@ -203,6 +203,10 @@ class MediaConnectionViewController: UIViewController,UITextViewDelegate ,UITabB
     private var localVideoStream: LocalVideoStream?
     private var localAudioStream: LocalAudioStream?
     private var localDataStream: LocalDataStream?
+    private var microphoneAudioSource: MicrophoneAudioSource?
+    private var cameraVideoSource: CameraVideoSource?
+    private var dataSource: DataSource?
+    private var cameraDevice: CameraVideoSource.Camera?
     private var remoteVideoStream: RemoteVideoStream?
     private var remoteAudioStream: RemoteAudioStream?
     private var remoteDataStream: RemoteDataStream?
