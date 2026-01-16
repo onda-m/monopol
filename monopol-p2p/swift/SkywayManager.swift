@@ -130,7 +130,7 @@ class SkywayManager: NSObject {
     }
 
     public func setLocalVideoEnabled(_ enabled: Bool) {
-        localVideoStream?.setIsEnabled(enabled)
+        localVideoStream?.enabled = enabled
     }
 
     func setRemoteView(remoteView: UIView) {
@@ -145,6 +145,7 @@ class SkywayManager: NSObject {
             try await Util.setupSkyWayRoomContextIfNeeded()
             let roomOptions = Room.InitOptions()
             roomOptions.name = roomName
+            roomOptions.type = .p2p
             let room = try await Room.findOrCreate(with: roomOptions)
             self.room = room
             let memberOptions = Room.MemberInitOptions()
@@ -161,7 +162,7 @@ class SkywayManager: NSObject {
 
     @MainActor
     private func attachRoomCallbacks(room: Room, localMember: LocalRoomMember) {
-        room.onPublicationPublished { [weak self] (publication: RoomPublication) in
+        room.onStreamPublished { [weak self] (publication: RoomPublication) in
             guard let self = self else { return }
             if publication.publisher.id == localMember.id {
                 return
@@ -171,10 +172,12 @@ class SkywayManager: NSObject {
             }
         }
 
-        room.onMemberLeft { [weak self] (member: RoomMember) in
-            guard let self = self else { return }
-            if member.id != localMember.id {
-                self.sessionDelegate?.connectDisconnect()
+        if let p2pRoom = room as? P2PRoom {
+            p2pRoom.onMemberLeft { [weak self] (member: RoomMember) in
+                guard let self = self else { return }
+                if member.id != localMember.id {
+                    self.sessionDelegate?.connectDisconnect()
+                }
             }
         }
     }
@@ -262,7 +265,7 @@ class SkywayManager: NSObject {
             }
         }
         if let localVideoStream = localVideoStream, let localVideoView = localVideoView {
-            localVideoStream.attach(localVideoView)
+            localVideoStream.addRenderer(localVideoView)
         }
     }
 
@@ -276,13 +279,13 @@ class SkywayManager: NSObject {
             }
         }
         if let remoteVideoStream = remoteVideoStream, let remoteVideoView = remoteVideoView {
-            remoteVideoStream.attach(remoteVideoView)
+            remoteVideoStream.addRenderer(remoteVideoView)
         }
     }
 
     private func detachLocalVideo() {
         if let localVideoView = localVideoView {
-            localVideoStream?.detach(localVideoView)
+            localVideoStream?.removeRenderer(localVideoView)
         }
         localVideoView?.removeFromSuperview()
         localVideoView = nil
@@ -290,7 +293,7 @@ class SkywayManager: NSObject {
 
     private func detachRemoteVideo() {
         if let remoteVideoView = remoteVideoView {
-            remoteVideoStream?.detach(remoteVideoView)
+            remoteVideoStream?.removeRenderer(remoteVideoView)
         }
         remoteVideoView?.removeFromSuperview()
         remoteVideoView = nil
