@@ -42,7 +42,7 @@ class SkywayManager: NSObject {
     private var remoteVideoStream: RemoteVideoStream?
     private var remoteAudioStream: RemoteAudioStream?
     private var remoteDataStream: RemoteDataStream?
-    private var localVideoView: VideoView?
+    private var localVideoView: CameraPreviewView?
     private var remoteVideoView: VideoView?
     private weak var localContainerView: UIView?
     private weak var remoteContainerView: UIView?
@@ -154,7 +154,9 @@ class SkywayManager: NSObject {
             //roomOptions.type = .p2p
             let room = try await Room.findOrCreate(with: roomOptions)
             self.room = room
-            let localMember = try await room.join(withName: memberName)
+            let memberOptions = Room.MemberInitOptions()
+            memberOptions.name = memberName
+            let localMember = try await room.join(with: memberOptions)
             self.localMember = localMember
             attachRoomCallbacks(room: room, localMember: localMember)
             try await publishLocalStreams(localMember: localMember)
@@ -239,7 +241,7 @@ class SkywayManager: NSObject {
     @MainActor
     private func subscribeToPublication(_ publication: RoomPublication, localMember: LocalRoomMember) async {
         do {
-            let subscription = try await localMember.subscribe(publication)
+            let subscription = try await localMember.subscribe(publicationId: publication.id, options: nil)
             roomSubscriptions.append(subscription)
             if let stream = subscription.stream as? RemoteVideoStream {
                 remoteVideoStream = stream
@@ -285,7 +287,7 @@ class SkywayManager: NSObject {
     private func attachLocalVideo() {
         guard let localContainerView = localContainerView else { return }
         if localVideoView == nil {
-            localVideoView = VideoView(frame: localContainerView.bounds)
+            localVideoView = CameraPreviewView(frame: localContainerView.bounds)
             if let localVideoView = localVideoView {
                 localVideoView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
                 localContainerView.addSubview(localVideoView)

@@ -111,7 +111,7 @@ class WaitViewController: UIViewController, AVCapturePhotoCaptureDelegate,UITabB
     var remoteVideoStream: RemoteVideoStream?
     var remoteAudioStream: RemoteAudioStream?
     var remoteDataStream: RemoteDataStream?
-    var localVideoView: VideoView?
+    var localVideoView: CameraPreviewView?
     var remoteVideoView: VideoView?
     var roomTask: Task<Void, Never>?
     var roomClosed = false
