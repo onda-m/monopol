@@ -145,7 +145,7 @@ class SkywayManager: NSObject {
             try await Util.setupSkyWayRoomContextIfNeeded()
             let roomOptions = Room.InitOptions()
             roomOptions.name = roomName
-            roomOptions.type = .p2p
+            //roomOptions.type = .p2p
             let room = try await Room.findOrCreate(with: roomOptions)
             self.room = room
             let localMember = try await room.join(withName: memberName)
@@ -259,7 +259,7 @@ class SkywayManager: NSObject {
         }
         roomSubscriptions.removeAll()
         for publication in roomPublications {
-            try? await localMember.unpublish(publication.id)
+            try? await localMember.unpublish(publicationId: publication.id)
         }
         roomPublications.removeAll()
     }
